@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
-import { isWithin24Hours } from '@/lib/utils'
 
 type State = { error?: string }
 
@@ -27,14 +26,22 @@ export async function submitResponse(_prev: State, formData: FormData): Promise<
 
   const admin = createAdminClient()
 
-  const { data: event } = await admin
+  // Only the latest event accepts responses.
+  // If a newer event was dispatched after the page loaded, reject gracefully.
+  const { data: latestEvent } = await admin
     .from('events')
-    .select('issued_at')
-    .eq('event_id', eventId)
-    .single()
+    .select('event_id')
+    .order('issued_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
-  if (!event) return { error: 'イベントが見つかりません' }
-  if (!isWithin24Hours(event.issued_at)) return { error: 'このイベントの受付は終了しました（発報から24時間経過）' }
+  if (!latestEvent) return { error: 'イベントが見つかりません' }
+  if (latestEvent.event_id !== eventId) {
+    return {
+      error:
+        '新しいイベントが発報されました。ホームに戻って最新の安否確認に回答してください。',
+    }
+  }
 
   const { error: insertError } = await admin.from('responses').insert({
     event_id: eventId,

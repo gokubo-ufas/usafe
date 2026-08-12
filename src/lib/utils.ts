@@ -1,4 +1,25 @@
-import type { Response, StatusGroup } from '@/types'
+import type { Event, Response, StatusGroup } from '@/types'
+
+// Display classification for event cards / badges.
+// earthquake + earthquake_info_id IS NULL  → manual production dispatch
+// earthquake + earthquake_info_id IS NOT NULL → automatic seismic alert
+export type DisplayEventType = 'test' | 'manual' | 'earthquake'
+
+export function getDisplayEventType(
+  event: Pick<Event, 'event_type' | 'earthquake_info_id'>,
+): DisplayEventType {
+  if (event.event_type === 'test') return 'test'
+  return event.earthquake_info_id === null ? 'manual' : 'earthquake'
+}
+
+export const DISPLAY_EVENT_TYPE_CONFIG: Record<
+  DisplayEventType,
+  { label: string; className: string }
+> = {
+  test:       { label: '訓練',    className: 'bg-blue-100 text-blue-700' },
+  manual:     { label: '本番発報', className: 'bg-orange-100 text-orange-700' },
+  earthquake: { label: '地震',    className: 'bg-red-100 text-red-700' },
+}
 
 export function getStatusGroup(response: Response | null): StatusGroup {
   if (!response || response.self_status === null) return 'unanswered'

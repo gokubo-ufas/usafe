@@ -1,5 +1,5 @@
 import type { Event } from '@/types'
-import { formatDateTime } from '@/lib/utils'
+import { formatDateTime, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
 
 type Props = {
   event: Event
@@ -8,26 +8,20 @@ type Props = {
 }
 
 export function EventSummary({ event, answeredCount, totalCount }: Props) {
-  const { event_type } = event
-  const isEarthquake = event_type === 'earthquake'
+  const displayType = getDisplayEventType(event)
+  const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
+  const isEarthquake = event.event_type === 'earthquake'
   const hasIntensity = isEarthquake && event.max_intensity !== null
   const hasEpicenter = isEarthquake && event.epicenter !== null
-
-  const typeBadge = {
-    earthquake: { label: '地震', className: 'bg-red-100 text-red-700' },
-    test:       { label: '訓練', className: 'bg-blue-100 text-blue-700' },
-    manual:     { label: '手動', className: 'bg-orange-100 text-orange-700' },
-  }[event_type] ?? { label: event_type, className: 'bg-gray-100 text-gray-700' }
-
-  const eventTitle = event_type === 'test' ? '安否確認訓練' : '安否確認'
+  const eventTitle = event.event_type === 'test' ? '安否確認訓練' : '安否確認'
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-3">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeBadge.className}`}>
-              {typeBadge.label}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
+              {label}
             </span>
             <span className="text-sm text-gray-500">{formatDateTime(event.issued_at)}</span>
           </div>

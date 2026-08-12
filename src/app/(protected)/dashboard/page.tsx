@@ -12,13 +12,11 @@ export default async function DashboardPage() {
   if (!employee) redirect('/login')
 
   const admin = createAdminClient()
-  // eslint-disable-next-line react-hooks/purity
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: activeEvent } = await admin
+  // Always show the single latest event, regardless of age.
+  const { data: latestEvent } = await admin
     .from('events')
     .select('*')
-    .gte('issued_at', twentyFourHoursAgo)
     .order('issued_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -28,7 +26,7 @@ export default async function DashboardPage() {
   let totalCount = 0
   let answeredCount = 0
 
-  if (activeEvent) {
+  if (latestEvent) {
     const [{ data: allEmployees }, { data: allResponses }] = await Promise.all([
       admin
         .from('employees')
@@ -38,7 +36,7 @@ export default async function DashboardPage() {
       admin
         .from('responses')
         .select('*')
-        .eq('event_id', activeEvent.event_id)
+        .eq('event_id', latestEvent.event_id)
         .order('created_at', { ascending: false }),
     ])
 
@@ -64,10 +62,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {activeEvent ? (
+      {latestEvent ? (
         <>
           <EventSummary
-            event={activeEvent}
+            event={latestEvent}
             answeredCount={answeredCount}
             totalCount={totalCount}
           />
@@ -80,7 +78,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-gray-400 mb-3">まだ回答していません</p>
             )}
             <ResponseForm
-              eventId={activeEvent.event_id}
+              eventId={latestEvent.event_id}
               hasAnswered={!!myResponse?.self_status}
             />
           </section>
@@ -96,7 +94,7 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-10 text-center">
           <div className="text-5xl mb-4">✅</div>
           <h2 className="text-lg font-semibold text-gray-800 mb-1">
-            現在アクティブなイベントはありません
+            現在イベントはありません
           </h2>
           <p className="text-sm text-gray-400">
             安否確認が発報されると、ここに表示されます。

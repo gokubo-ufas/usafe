@@ -1,24 +1,20 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { formatDateTime, isWithin24Hours } from '@/lib/utils'
+import { formatDateTime, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
 import type { Event } from '@/types'
 
-const TYPE_CONFIG: Record<Event['event_type'], { label: string; className: string }> = {
-  earthquake: { label: '地震', className: 'bg-red-100 text-red-700' },
-  test:       { label: '訓練', className: 'bg-blue-100 text-blue-700' },
-  manual:     { label: '手動', className: 'bg-orange-100 text-orange-700' },
-}
+type HistoryEvent = Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id'>
 
 export default async function HistoryPage() {
   const admin = createAdminClient()
 
   const { data } = await admin
     .from('events')
-    .select('event_id, event_type, issued_at, issuer, comment')
+    .select('event_id, event_type, issued_at, issuer, comment, earthquake_info_id')
     .order('issued_at', { ascending: false })
     .limit(50)
 
-  const events = (data ?? []) as Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment'>[]
+  const events = (data ?? []) as HistoryEvent[]
 
   if (events.length === 0) {
     return (
@@ -30,13 +26,16 @@ export default async function HistoryPage() {
     )
   }
 
+  const latestEventId = events[0]?.event_id
+
   return (
     <div className="space-y-3">
       <h1 className="text-lg font-bold text-gray-900">発報履歴</h1>
 
       {events.map((event) => {
-        const isActive = isWithin24Hours(event.issued_at)
-        const type = TYPE_CONFIG[event.event_type] ?? { label: event.event_type, className: 'bg-gray-100 text-gray-600' }
+        const displayType = getDisplayEventType(event)
+        const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
+        const isLatest = event.event_id === latestEventId
 
         return (
           <Link
@@ -46,13 +45,13 @@ export default async function HistoryPage() {
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${type.className}`}>
-                  {type.label}
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${className}`}>
+                  {label}
                 </span>
-                {isActive && (
+                {isLatest && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                    受付中
+                    最新
                   </span>
                 )}
               </div>

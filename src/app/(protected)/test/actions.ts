@@ -16,18 +16,6 @@ export async function dispatchTestAlert(_prev: State, formData: FormData): Promi
   }
 
   const admin = createAdminClient()
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-
-  const { data: activeEvent } = await admin
-    .from('events')
-    .select('event_id')
-    .gte('issued_at', twentyFourHoursAgo)
-    .limit(1)
-    .maybeSingle()
-
-  if (activeEvent) {
-    return { error: 'アクティブなイベントが既に存在します。24時間経過後に再試行してください。' }
-  }
 
   const { error } = await admin.rpc('dispatch_alert', {
     p_event_type: 'test',

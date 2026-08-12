@@ -7,7 +7,7 @@ export type Employee = {
 
 export type Event = {
   event_id: string
-  event_type: 'earthquake' | 'test' | 'manual'
+  event_type: 'earthquake' | 'test'
   issued_at: string
   earthquake_info_id: string | null
   max_intensity: number | null
