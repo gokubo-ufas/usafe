@@ -41,7 +41,6 @@ function validateEmployees(employees: unknown): ValidationResult {
   }
 
   const seenNumbers = new Set<string>()
-  const seenEmails = new Set<string>()
 
   for (let i = 0; i < employees.length; i++) {
     const emp = employees[i] as Record<string, unknown>
@@ -63,10 +62,6 @@ function validateEmployees(employees: unknown): ValidationResult {
     if (!email || !EMAIL_REGEX.test(email)) {
       return { valid: false, error: `employees[${i}]: valid email is required` }
     }
-    if (seenEmails.has(email)) {
-      return { valid: false, error: `Duplicate email: ${email}` }
-    }
-    seenEmails.add(email)
 
     if (typeof emp.is_active !== 'boolean') {
       return { valid: false, error: `employees[${i}]: is_active must be a boolean` }
