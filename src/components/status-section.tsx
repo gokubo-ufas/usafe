@@ -28,7 +28,8 @@ const WORK_LABEL: Record<string, string> = {
 
 const SUMMARY_CONFIG = {
   critical: {
-    label: '負傷',
+    label: '要対応',
+    description: '負傷・救助要請あり',
     fg: 'text-red-600',
     gradFrom: 'from-red-50',
     border: 'border-red-200',
@@ -38,7 +39,8 @@ const SUMMARY_CONFIG = {
     dot: 'bg-red-400',
   },
   checking: {
-    label: '安否確認中',
+    label: '確認中',
+    description: '家族の安否を確認中',
     fg: 'text-amber-600',
     gradFrom: 'from-amber-50',
     border: 'border-amber-200',
@@ -49,6 +51,7 @@ const SUMMARY_CONFIG = {
   },
   unanswered: {
     label: '未回答',
+    description: 'まだ回答がない',
     fg: 'text-gray-400',
     gradFrom: 'from-gray-50',
     border: 'border-gray-200',
@@ -59,6 +62,7 @@ const SUMMARY_CONFIG = {
   },
   safe: {
     label: '無事',
+    description: '本人・家族ともに安全',
     fg: 'text-emerald-600',
     gradFrom: 'from-emerald-50',
     border: 'border-emerald-200',
@@ -106,60 +110,37 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
         const workVal   = r?.work_status   ? (WORK_LABEL[r.work_status]     ?? r.work_status)   : '—'
 
         return (
-          <div
-            key={emp.employee_number}
-            className={cn(
-              'grid items-center py-3',
-              'grid-cols-[auto_1fr_auto_auto_auto_auto]',
-              'sm:grid-cols-[auto_1fr_auto_auto_auto_1fr_auto]',
-            )}
-          >
-            {/* 部署 */}
-            <div className="pl-4 pr-3 flex items-center">
-              {emp.department && (
-                <span className="text-[10px] font-medium text-gray-400 bg-gray-100 rounded-md px-1.5 py-0.5 whitespace-nowrap tracking-wide">
-                  {emp.department}
-                </span>
-              )}
-            </div>
+          <div key={emp.employee_number} className="px-4 py-2.5 space-y-1">
 
-            {/* 名前 */}
-            <div className="pr-4 flex items-center">
-              <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">{emp.name}</span>
-            </div>
-
-            {/* 本人 */}
-            <div className="pr-4 flex items-center">
-              {answered ? <StatusCell label="本人" value={selfVal} /> : null}
-            </div>
-
-            {/* 家族 */}
-            <div className="pr-4 flex items-center">
-              {answered ? <StatusCell label="家族" value={familyVal} /> : null}
-            </div>
-
-            {/* 業務 */}
-            <div className="pr-4 flex items-center">
-              {answered ? <StatusCell label="業務" value={workVal} /> : null}
-            </div>
-
-            {/* コメント (sm+) */}
-            <div className="pr-4 min-w-0 hidden sm:flex items-center">
-              {answered && r?.comment && (
-                <span className="text-xs text-gray-400 truncate block" title={r.comment}>
-                  「{r.comment}」
-                </span>
-              )}
-            </div>
-
-            {/* 時刻 */}
-            <div className="pr-4 flex items-center justify-end">
-              {answered && r && (
+            {/* 1行：氏名・本人・家族・業務を等間隔 + 時刻右端 */}
+            <div className="grid items-center grid-cols-[2fr_1fr_1fr_1fr_auto]">
+              <div className="flex items-center">
+                <span className="text-sm font-semibold text-gray-800 truncate">{emp.name}</span>
+              </div>
+              <div className="flex items-center">
+                <StatusCell label="本人" value={selfVal} />
+              </div>
+              <div className="flex items-center">
+                <StatusCell label="家族" value={familyVal} />
+              </div>
+              <div className="flex items-center">
+                <StatusCell label="業務" value={workVal} />
+              </div>
+              <div className="pl-2 flex items-center justify-end">
                 <span className="text-[10px] text-gray-300 whitespace-nowrap tabular-nums">
-                  {formatAnsweredAt(r.created_at)}
+                  {answered && r ? formatAnsweredAt(r.created_at) : ''}
                 </span>
-              )}
+              </div>
             </div>
+
+            {/* コメント（あれば右寄せ吹き出し） */}
+            {r?.comment && (
+              <div className="flex justify-end">
+                <span className="text-xs text-gray-600 bg-gray-100 rounded-2xl rounded-tr-sm px-3 py-1 max-w-[80%] text-right">
+                  {r.comment}
+                </span>
+              </div>
+            )}
           </div>
         )
       })}
@@ -199,7 +180,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
       {middleSlot}
 
       {/* サマリーカード */}
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
         {groups.map(({ key, summary, total }) => {
           const isActive = groupFilter === key
           return (
@@ -220,8 +201,11 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
               <div className={cn('text-2xl font-bold tabular-nums tracking-tight', summary.fg)}>
                 {total}
               </div>
-              <div className={cn('text-[10px] font-semibold mt-0.5 leading-tight', summary.fg)}>
+              <div className={cn('text-[11px] font-bold mt-0.5 leading-tight', summary.fg)}>
                 {summary.label}
+              </div>
+              <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">
+                {summary.description}
               </div>
             </button>
           )

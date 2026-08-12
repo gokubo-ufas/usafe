@@ -72,7 +72,7 @@ export const WORK_STATUS_LABELS: Record<string, string> = {
 
 export const STATUS_GROUP_CONFIG = {
   critical: {
-    label: '負傷',
+    label: '要対応',
     description: '本人またはご家族に負傷・救助が必要な方',
     textColor: 'text-red-700',
     bgColor: 'bg-red-50',
@@ -81,7 +81,7 @@ export const STATUS_GROUP_CONFIG = {
     dotClass: 'bg-red-500',
   },
   checking: {
-    label: '安否確認中',
+    label: '確認中',
     description: 'ご家族の安全を確認中の方',
     textColor: 'text-amber-700',
     bgColor: 'bg-amber-50',

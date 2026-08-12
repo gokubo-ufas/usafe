@@ -147,7 +147,7 @@ function EventCard({ event, counts, href }: { event: HistoryEvent; counts: Group
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {counts.critical > 0 && (
               <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                負傷 {counts.critical}
+                要対応 {counts.critical}
               </span>
             )}
             {counts.checking > 0 && (
