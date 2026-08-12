@@ -2,7 +2,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { signOut } from '@/app/auth/actions'
-import { SyncForm } from './sync-form'
+
+// Disaster resilience principle:
+// Alert dispatch (earthquake / manual / test) reads ONLY from the employees table.
+// It never contacts Google Sheets or GAS — a Sheets outage must not block alerts.
+// Employee data is kept current via the GAS push sync (POST /api/employees/sync).
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -24,7 +28,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="max-w-lg mx-auto">
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h1 className="text-xl font-bold text-gray-900 mb-4">U-Safe</h1>
           <dl className="space-y-3 text-sm">
@@ -38,14 +42,6 @@ export default async function DashboardPage() {
               ログアウト
             </button>
           </form>
-        </section>
-
-        <section className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-800 mb-1">
-            社員マスタ管理
-          </h2>
-          <p className="text-xs text-gray-400 mb-4">開発確認用 — 後続フェーズでテスト発報画面へ統合予定</p>
-          <SyncForm />
         </section>
       </div>
     </main>
