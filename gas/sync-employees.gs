@@ -12,22 +12,31 @@
  *    ※ Secret はスプレッドシートのセルには保存しないこと
  *
  * 【スプレッドシート形式】
- * シート名「社員マスタ」の1行目（ヘッダー）に以下の列が必要：
- *   社員番号 / 氏名 / メールアドレス / 部門 / 在籍フラグ
+ * データ開始行：3行目
+ *   A列：社員番号
+ *   B列：氏名
+ *   C列：メールアドレス
+ *   D列：部門
+ *   E列：退職FLG（空欄 = 在籍 / ● = 退職 / それ以外 = エラー）
  *
- * 【在籍フラグの有効値】
- *   true, 1, ○, yes, 在籍 → 在籍（is_active: true）
- *   それ以外 → 退職（is_active: false）
+ * 【必須項目】
+ *   社員番号・氏名・メールアドレス（いずれかが空の非空行はエラーで中止）
+ *
+ * 【完全空行】
+ *   A〜E列がすべて空の行はスキップする
  */
 
 var SHEET_NAME = '社員マスタ';
+var DATA_START_ROW = 3; // データ開始行（1-indexed）
+var NUM_COLS = 5;       // A〜E列
 
-var COLUMN_HEADERS = {
-  employee_number: '社員番号',
-  name: '氏名',
-  email: 'メールアドレス',
-  department: '部門',
-  is_active: '在籍フラグ',
+// 列インデックス（0-indexed、A=0）
+var COL = {
+  employee_number: 0, // A
+  name:            1, // B
+  email:           2, // C
+  department:      3, // D
+  retired_flag:    4, // E
 };
 
 /** Spreadsheet を開いたときにカスタムメニューを追加する */
@@ -58,53 +67,63 @@ function syncEmployees() {
     return;
   }
 
-  var data = sheet.getDataRange().getValues();
-  if (data.length < 2) {
-    SpreadsheetApp.getUi().alert('社員データがありません（ヘッダー行のみ）。');
+  var lastRow = sheet.getLastRow();
+  if (lastRow < DATA_START_ROW) {
+    SpreadsheetApp.getUi().alert('社員データがありません（' + DATA_START_ROW + '行目以降にデータがありません）。');
     return;
   }
 
-  // ヘッダー行から列インデックスを解決する
-  var headers = data[0].map(function(h) { return String(h); });
-  var col = {};
-  var missingCols = [];
-  for (var key in COLUMN_HEADERS) {
-    var idx = headers.indexOf(COLUMN_HEADERS[key]);
-    if (idx === -1) {
-      missingCols.push(COLUMN_HEADERS[key]);
-    } else {
-      col[key] = idx;
-    }
-  }
-  if (missingCols.length > 0) {
-    SpreadsheetApp.getUi().alert('必要な列が見つかりません: ' + missingCols.join(', '));
-    return;
-  }
+  var numRows = lastRow - DATA_START_ROW + 1;
+  var data = sheet.getRange(DATA_START_ROW, 1, numRows, NUM_COLS).getValues();
 
-  // 社員リストを構築する
   var employees = [];
-  for (var i = 1; i < data.length; i++) {
-    var row = data[i];
-    var empNumber = String(row[col.employee_number] || '').trim();
-    if (!empNumber) continue; // 社員番号が空の行はスキップ
 
-    var isActiveRaw = row[col.is_active];
-    var isActiveStr = String(isActiveRaw).trim().toLowerCase();
-    var isActive = (
-      isActiveRaw === true ||
-      isActiveRaw === 1 ||
-      isActiveStr === '○' ||
-      isActiveStr === 'yes' ||
-      isActiveStr === '在籍' ||
-      isActiveStr === 'true'
-    );
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    var rowNum = DATA_START_ROW + i;
+
+    // 完全空行（A〜E列がすべて空）はスキップ
+    var allEmpty = true;
+    for (var c = 0; c < NUM_COLS; c++) {
+      if (String(row[c]).trim() !== '') { allEmpty = false; break; }
+    }
+    if (allEmpty) continue;
+
+    // 必須項目チェック
+    var empNumber  = String(row[COL.employee_number] || '').trim();
+    var name       = String(row[COL.name]            || '').trim();
+    var email      = String(row[COL.email]           || '').trim().toLowerCase();
+
+    if (!empNumber || !name || !email) {
+      SpreadsheetApp.getUi().alert(
+        rowNum + '行目に必須項目が不足しています。\n' +
+        '社員番号・氏名・メールアドレスはすべて必須です。\n同期を中止します。'
+      );
+      return;
+    }
+
+    // 退職FLG変換
+    var retiredFlagStr = String(row[COL.retired_flag]).trim();
+    var isActive;
+
+    if (retiredFlagStr === '') {
+      isActive = true;          // 空欄 → 在籍
+    } else if (retiredFlagStr === '●') {
+      isActive = false;         // ● → 退職
+    } else {
+      SpreadsheetApp.getUi().alert(
+        rowNum + '行目の退職FLGに不正な値があります：「' + retiredFlagStr + '」\n' +
+        '有効な値は空欄（在籍）または「●」（退職）のみです。\n同期を中止します。'
+      );
+      return;
+    }
 
     employees.push({
       employee_number: empNumber,
-      name: String(row[col.name] || '').trim(),
-      email: String(row[col.email] || '').trim().toLowerCase(),
-      department: String(row[col.department] || '').trim() || null,
-      is_active: isActive,
+      name:            name,
+      email:           email,
+      department:      String(row[COL.department] || '').trim() || null,
+      is_active:       isActive,
     });
   }
 
@@ -131,7 +150,6 @@ function syncEmployees() {
         'U-Safeの社員マスタを最新化しました。\n対象社員数：' + result.received + '名'
       );
     } else {
-      // エラー詳細はログのみに記録（Secret は含めない）
       Logger.log('[U-Safe sync] status=' + statusCode + ' error=' + (result.error || 'unknown'));
       SpreadsheetApp.getUi().alert('U-Safeの社員マスタ最新化に失敗しました。');
     }
