@@ -44,3 +44,7 @@ next-env.d.ts
 # Claude Code local config
 AGENTS.md
 CLAUDE.md
+
+# Supabase local development
+supabase/.branches
+supabase/.temp
