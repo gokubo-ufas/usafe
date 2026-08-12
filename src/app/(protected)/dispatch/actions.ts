@@ -1,10 +1,15 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
+import { postSlackAlert } from '@/lib/slack'
+import { redirect } from 'next/navigation'
 
-type State = { error?: string }
+type State = {
+  error?: string
+  success?: string
+  slackFailed?: boolean
+}
 
 export async function dispatchDrill(_prev: State, formData: FormData): Promise<State> {
   const employee = await getCurrentEmployee()
@@ -27,7 +32,17 @@ export async function dispatchDrill(_prev: State, formData: FormData): Promise<S
     return { error: '発報に失敗しました。もう一度お試しください。' }
   }
 
-  redirect('/dashboard')
+  const issuedAt = new Date()
+  const slackResult = await postSlackAlert({ type: 'test', comment, issuedAt })
+
+  if (slackResult.ok) {
+    return { success: '安否確認を発報しました。' }
+  }
+
+  return {
+    success: '安否確認は作成されましたが、Slackへの通知に失敗しました。',
+    slackFailed: true,
+  }
 }
 
 export async function dispatchProduction(_prev: State, formData: FormData): Promise<State> {
@@ -51,5 +66,15 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
     return { error: '発報に失敗しました。もう一度お試しください。' }
   }
 
-  redirect('/dashboard')
+  const issuedAt = new Date()
+  const slackResult = await postSlackAlert({ type: 'production', comment, issuedAt })
+
+  if (slackResult.ok) {
+    return { success: '安否確認を発報しました。' }
+  }
+
+  return {
+    success: '安否確認は作成されましたが、Slackへの通知に失敗しました。',
+    slackFailed: true,
+  }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useRef, useState } from 'react'
+import Link from 'next/link'
 import { ConfirmModal } from '@/components/confirm-modal'
 import { dispatchDrill, dispatchProduction } from './actions'
 import { cn } from '@/lib/cn'
@@ -8,7 +9,7 @@ import { cn } from '@/lib/cn'
 type Employee = { employee_number: string; name: string; department: string | null }
 
 type Mode = 'drill' | 'production'
-type State = { error?: string }
+type State = { error?: string; success?: string; slackFailed?: boolean }
 const INIT: State = {}
 
 const MODES = [
@@ -78,7 +79,10 @@ export function DispatchForm({ employeeCount }: { employeeCount: number }) {
 
   const current       = MODES.find((m) => m.id === mode)!
   const isPending     = mode === 'drill' ? drillPending : prodPending
-  const error         = mode === 'drill' ? drillState.error : prodState.error
+  const activeState   = mode === 'drill' ? drillState : prodState
+  const error         = activeState.error
+  const success       = activeState.success
+  const slackFailed   = activeState.slackFailed
   const canSubmit     = mode === 'drill' || agreed
 
   function handleConfirm() {
@@ -87,6 +91,40 @@ export function DispatchForm({ employeeCount }: { employeeCount: number }) {
     const fd = new FormData(formRef.current)
     if (mode === 'drill') drillAction(fd)
     else                  prodAction(fd)
+  }
+
+  // Show result card after successful dispatch
+  if (success) {
+    return (
+      <div
+        className={cn(
+          'rounded-2xl border p-6 space-y-4',
+          slackFailed
+            ? 'bg-amber-50 border-amber-300'
+            : 'bg-emerald-50 border-emerald-300',
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">{slackFailed ? '⚠️' : '✅'}</span>
+          <p
+            className={cn(
+              'text-sm font-medium leading-relaxed',
+              slackFailed ? 'text-amber-800' : 'text-emerald-800',
+            )}
+          >
+            {success}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 pt-2">
+          <Link
+            href="/dashboard"
+            className="block w-full py-3 text-center text-sm font-semibold rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            ダッシュボードへ戻る
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
