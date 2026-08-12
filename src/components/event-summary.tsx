@@ -11,7 +11,6 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
   const displayType = getDisplayEventType(event)
   const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
   const isEarthquake = event.event_type === 'earthquake'
-  const eventTitle = event.event_type === 'test' ? '安否確認訓練' : '安否確認'
   const pct = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
   return (
@@ -29,7 +28,12 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
               </span>
               <span className="text-sm text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight">{eventTitle}</h2>
+            {event.comment && (
+              <p className="text-base font-bold text-gray-900 tracking-tight">{event.comment}</p>
+            )}
+            <p className="text-xs text-gray-400">
+              発報者：<span className="font-medium text-gray-600">{event.issuer ?? '自動'}</span>
+            </p>
           </div>
 
           {/* 回答人数 */}
@@ -58,10 +62,6 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
               </div>
             )}
           </div>
-        )}
-
-        {event.comment && (
-          <p className="text-sm text-gray-500">{event.comment}</p>
         )}
 
         {/* 進捗バー */}

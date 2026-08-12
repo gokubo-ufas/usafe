@@ -10,20 +10,20 @@ const GROUP_ORDER = ['critical', 'checking', 'unanswered', 'safe'] as const
 const SELF_LABEL: Record<string, string> = {
   safe:        '無事',
   injured:     '負傷',
-  need_rescue: '救助要請',
+  need_rescue: '救助が必要',
 }
 
 const FAMILY_LABEL: Record<string, string> = {
   safe:           '無事',
   injured:        '負傷',
-  need_rescue:    '救助要請',
-  checking:       '確認中',
-  not_applicable: '対象外',
+  need_rescue:    '救助が必要',
+  checking:       '安否確認中',
+  not_applicable: '対象家族なし',
 }
 
 const WORK_LABEL: Record<string, string> = {
-  available:   '可能',
-  unavailable: '困難',
+  available:   '対応可能',
+  unavailable: '対応困難',
 }
 
 const SUMMARY_CONFIG = {
@@ -89,15 +89,6 @@ function formatAnsweredAt(iso: string): string {
 // EmployeeGrid
 // ─────────────────────────────────────────
 
-function StatusCell({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="text-xs whitespace-nowrap">
-      <span className="text-gray-400">{label}：</span>
-      <span className="font-semibold text-gray-700">{value}</span>
-    </span>
-  )
-}
-
 function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
   return (
     <div className="divide-y divide-gray-100/80">
@@ -112,33 +103,34 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
         return (
           <div key={emp.employee_number} className="px-4 py-2.5 space-y-1">
 
-            {/* 1行：氏名・本人・家族・業務を等間隔 + 時刻右端 */}
-            <div className="grid items-center grid-cols-[2fr_1fr_1fr_1fr_auto]">
-              <div className="flex items-center">
-                <span className="text-sm font-semibold text-gray-800 truncate">{emp.name}</span>
-              </div>
-              <div className="flex items-center">
-                <StatusCell label="本人" value={selfVal} />
-              </div>
-              <div className="flex items-center">
-                <StatusCell label="家族" value={familyVal} />
-              </div>
-              <div className="flex items-center">
-                <StatusCell label="業務" value={workVal} />
-              </div>
-              <div className="pl-2 flex items-center justify-end">
-                <span className="text-[10px] text-gray-300 whitespace-nowrap tabular-nums">
-                  {answered && r ? formatAnsweredAt(r.created_at) : ''}
-                </span>
-              </div>
+            {/* 行1：氏名 + 最終更新日時 */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-base font-semibold text-gray-800 truncate">{emp.name}</span>
+              <span className="text-[10px] text-gray-300 whitespace-nowrap tabular-nums shrink-0">
+                {answered && r ? formatAnsweredAt(r.created_at) : ''}
+              </span>
             </div>
 
-            {/* コメント（あれば右寄せ吹き出し） */}
+            {/* 行2：本人・家族・業務 等分3列（全行揃え） */}
+            <div className="grid grid-cols-3 text-xs">
+              <span>
+                <span className="text-gray-400">本人：</span>
+                <span className="font-semibold text-gray-700">{selfVal}</span>
+              </span>
+              <span>
+                <span className="text-gray-400">家族：</span>
+                <span className="font-semibold text-gray-700">{familyVal}</span>
+              </span>
+              <span>
+                <span className="text-gray-400">業務：</span>
+                <span className="font-semibold text-gray-700">{workVal}</span>
+              </span>
+            </div>
+
+            {/* 行3：コメント（あれば左詰め） */}
             {r?.comment && (
-              <div className="flex justify-end">
-                <span className="text-xs text-gray-600 bg-gray-100 rounded-2xl rounded-tr-sm px-3 py-1 max-w-[80%] text-right">
-                  {r.comment}
-                </span>
+              <div className="text-xs text-gray-400">
+                コメント：{r.comment}
               </div>
             )}
           </div>
@@ -198,11 +190,11 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
                 total === 0 && 'opacity-25 cursor-default pointer-events-none',
               )}
             >
-              <div className={cn('text-2xl font-bold tabular-nums tracking-tight', summary.fg)}>
-                {total}
-              </div>
-              <div className={cn('text-[11px] font-bold mt-0.5 leading-tight', summary.fg)}>
+              <div className={cn('text-[11px] font-bold leading-tight', summary.fg)}>
                 {summary.label}
+              </div>
+              <div className={cn('text-2xl font-bold tabular-nums tracking-tight mt-0.5', summary.fg)}>
+                {total}
               </div>
               <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">
                 {summary.description}
@@ -240,12 +232,13 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
                 summary.headerBg,
                 summary.accentBorder,
               )}>
-                <h3 className={cn('text-sm font-bold flex-1 tracking-tight', summary.fg)}>
+                <h3 className={cn('text-sm font-bold tracking-tight shrink-0', summary.fg)}>
                   {config.label}
                 </h3>
-                <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold', summary.badgeClass)}>
+                <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0', summary.badgeClass)}>
                   {members.length}名
                 </span>
+                <p className="text-[10px] text-gray-400 truncate flex-1 text-right">{summary.description}</p>
               </div>
 
               <EmployeeGrid members={members} />

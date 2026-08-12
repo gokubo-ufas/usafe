@@ -112,7 +112,6 @@ function EventCard({ event, counts, href }: { event: HistoryEvent; counts: Group
   const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
   const answered = counts.safe + counts.critical + counts.checking
   const pct = counts.total > 0 ? Math.round((answered / counts.total) * 100) : 0
-  const eventTitle = event.event_type === 'test' ? '安否確認訓練' : '安否確認'
 
   return (
     <Link
@@ -122,18 +121,15 @@ function EventCard({ event, counts, href }: { event: HistoryEvent; counts: Group
       {/* 日時（左上固定） */}
       <p className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</p>
 
-      {/* バッジ + タイトル */}
-      <div className="flex items-center gap-2">
+      {/* バッジ + 説明文 */}
+      <div className="flex items-start gap-2">
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0 ${className}`}>
           {label}
         </span>
-        <p className="text-sm font-bold text-gray-900">{eventTitle}</p>
+        {event.comment && (
+          <p className="text-sm font-bold text-gray-900">{event.comment}</p>
+        )}
       </div>
-
-      {/* コメント */}
-      {event.comment && (
-        <p className="text-xs text-gray-500 truncate">{event.comment}</p>
-      )}
 
       {/* 発報者 */}
       <p className="text-xs text-gray-400">
@@ -145,26 +141,18 @@ function EventCard({ event, counts, href }: { event: HistoryEvent; counts: Group
         <div className="text-right space-y-1.5">
           <p className="text-xs text-gray-400 tabular-nums">{answered}/{counts.total}名 ({pct}%)</p>
           <div className="flex items-center gap-1.5 flex-wrap justify-end">
-            {counts.critical > 0 && (
-              <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                要対応 {counts.critical}
-              </span>
-            )}
-            {counts.checking > 0 && (
-              <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                確認中 {counts.checking}
-              </span>
-            )}
-            {counts.unanswered > 0 && (
-              <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                未回答 {counts.unanswered}
-              </span>
-            )}
-            {counts.safe > 0 && (
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                無事 {counts.safe}
-              </span>
-            )}
+            <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+              要対応 {counts.critical || '-'}
+            </span>
+            <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+              確認中 {counts.checking || '-'}
+            </span>
+            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+              未回答 {counts.unanswered || '-'}
+            </span>
+            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              無事 {counts.safe || '-'}
+            </span>
           </div>
         </div>
       </div>
