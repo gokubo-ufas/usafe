@@ -30,7 +30,7 @@ export default async function HistoryPage() {
 
   const eventIds = events.map((e) => e.event_id)
 
-  const [{ data: responsesData }, { count: totalEmployees }] = await Promise.all([
+  const [, { count: totalEmployees }] = await Promise.all([
     admin
       .from('responses')
       .select('event_id, self_status, family_status, work_status, comment')
@@ -41,7 +41,6 @@ export default async function HistoryPage() {
       .eq('is_active', true),
   ])
 
-  const responses = (responsesData ?? []) as (Pick<Response, 'event_id' | 'self_status' | 'family_status' | 'work_status' | 'comment'>)[]
   const total = totalEmployees ?? 0
 
   // event_id ごとに最新レスポンスを集約してグループ集計
