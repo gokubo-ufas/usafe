@@ -12,6 +12,7 @@ type Props = {
   onConfirm: () => void
   isPending?: boolean
   danger?: boolean
+  warning?: boolean
 }
 
 export function ConfirmModal({
@@ -23,6 +24,7 @@ export function ConfirmModal({
   onConfirm,
   isPending,
   danger,
+  warning,
 }: Props) {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden'
@@ -54,9 +56,9 @@ export function ConfirmModal({
             disabled={isPending}
             className={cn(
               'px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50',
-              danger
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-emerald-700 text-white hover:bg-emerald-800',
+              danger   ? 'bg-red-600    text-white hover:bg-red-700' :
+              warning  ? 'bg-amber-500  text-white hover:bg-amber-600' :
+                         'bg-emerald-700 text-white hover:bg-emerald-800',
             )}
           >
             {isPending ? '処理中...' : confirmLabel}

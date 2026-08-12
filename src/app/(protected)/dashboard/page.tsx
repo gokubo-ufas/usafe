@@ -60,8 +60,13 @@ export default async function DashboardPage() {
     })
   }
 
+  const bgClass = latestEvent
+    ? latestEvent.event_type === 'test' ? 'bg-amber-50' : 'bg-red-50'
+    : 'bg-white'
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      <div className={`fixed inset-0 -z-10 ${bgClass}`} />
       {latestEvent ? (
         <>
           <EventSummary
@@ -70,35 +75,39 @@ export default async function DashboardPage() {
             totalCount={totalCount}
           />
 
-          <section className="bg-white rounded-xl shadow-sm p-5">
-            <h2 className="text-sm font-medium text-gray-500 mb-3">あなたの回答状況</h2>
-            {myResponse?.self_status ? (
-              <p className="text-sm text-emerald-700 font-medium mb-3">✓ 回答済み</p>
-            ) : (
-              <p className="text-sm text-gray-400 mb-3">まだ回答していません</p>
-            )}
-            <ResponseForm
-              eventId={latestEvent.event_id}
-              hasAnswered={!!myResponse?.self_status}
-            />
-          </section>
-
-          <section>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              回答状況一覧
-            </h2>
-            <StatusSection employees={employeesWithStatus} />
-          </section>
+          <StatusSection
+            employees={employeesWithStatus}
+            middleSlot={
+              <div className="bg-white rounded-2xl shadow-sm px-5 py-3 space-y-2 border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-emerald-700">あなたの回答状況</h2>
+                  {myResponse?.self_status ? (
+                    <span className="text-xs font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shadow-sm">
+                      ✓ 回答済み
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-red-600 animate-pulse">直ちに安否を報告してください！</span>
+                      <span className="text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full shadow-sm animate-pulse">
+                        未回答
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <ResponseForm
+                  eventId={latestEvent.event_id}
+                  hasAnswered={!!myResponse?.self_status}
+                  currentResponse={myResponse}
+                />
+              </div>
+            }
+          />
         </>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm p-10 text-center">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-1">
-            現在イベントはありません
-          </h2>
-          <p className="text-sm text-gray-400">
-            安否確認が発報されると、ここに表示されます。
-          </p>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+          <div className="text-4xl mb-4">✅</div>
+          <h2 className="text-base font-semibold text-gray-800 mb-1">現在イベントはありません</h2>
+          <p className="text-sm text-gray-400">安否確認が発報されると、ここに表示されます。</p>
         </div>
       )}
     </div>

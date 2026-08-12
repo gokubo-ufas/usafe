@@ -11,49 +11,76 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
   const displayType = getDisplayEventType(event)
   const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
   const isEarthquake = event.event_type === 'earthquake'
-  const hasIntensity = isEarthquake && event.max_intensity !== null
-  const hasEpicenter = isEarthquake && event.epicenter !== null
   const eventTitle = event.event_type === 'test' ? '安否確認訓練' : '安否確認'
+  const pct = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
-              {label}
-            </span>
-            <span className="text-sm text-gray-500">{formatDateTime(event.issued_at)}</span>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* カラーアクセントバー */}
+      <div className={`h-3 w-full ${displayType === 'test' ? 'bg-amber-400' : 'bg-red-400'}`} />
+
+      <div className="p-5 space-y-4">
+        {/* ヘッダー */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${className}`}>
+                {label}
+              </span>
+              <span className="text-sm text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">{eventTitle}</h2>
           </div>
 
-          <h2 className="text-base font-bold text-gray-900 mb-2">{eventTitle}</h2>
-
-          <dl className="space-y-1 text-sm text-gray-600">
-            {hasIntensity && (
-              <div className="flex gap-2">
-                <dt className="text-gray-400 shrink-0">最大震度</dt>
-                <dd className="font-medium text-gray-900">震度 {event.max_intensity}</dd>
-              </div>
-            )}
-            {hasEpicenter && (
-              <div className="flex gap-2">
-                <dt className="text-gray-400 shrink-0">震源地</dt>
-                <dd className="font-medium text-gray-900">{event.epicenter}</dd>
-              </div>
-            )}
-            {event.comment && (
-              <div className="flex gap-2">
-                <dt className="text-gray-400 shrink-0">備考</dt>
-                <dd className="text-gray-700">{event.comment}</dd>
-              </div>
-            )}
-          </dl>
+          {/* 回答人数 */}
+          <div className="text-right shrink-0">
+            <div className="text-3xl font-bold tabular-nums text-gray-900 tracking-tight">
+              {answeredCount}
+              <span className="text-base font-normal text-gray-400 ml-1">/ {totalCount}名</span>
+            </div>
+            <div className="text-xs text-gray-400 mt-0.5">回答済み</div>
+          </div>
         </div>
 
-        <div className="text-right shrink-0">
-          <div className="text-2xl font-bold text-gray-900">{answeredCount}</div>
-          <div className="text-xs text-gray-400">/ {totalCount} 名</div>
-          <div className="text-xs text-gray-400 mt-0.5">回答済み</div>
+        {/* 地震情報 */}
+        {isEarthquake && (event.max_intensity !== null || event.epicenter !== null) && (
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
+            {event.max_intensity !== null && (
+              <div className="flex items-baseline gap-1.5 text-sm">
+                <span className="text-xs text-gray-400">最大震度</span>
+                <span className="font-bold text-gray-900">震度 {event.max_intensity}</span>
+              </div>
+            )}
+            {event.epicenter !== null && (
+              <div className="flex items-baseline gap-1.5 text-sm">
+                <span className="text-xs text-gray-400">震源地</span>
+                <span className="font-semibold text-gray-900">{event.epicenter}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {event.comment && (
+          <p className="text-sm text-gray-500">{event.comment}</p>
+        )}
+
+        {/* 進捗バー */}
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-baseline">
+            <span className="text-[11px] text-gray-400 font-medium">回答率</span>
+            <span className="text-[11px] text-gray-500 font-semibold tabular-nums">{pct}%</span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${pct}%`,
+                background: pct === 100
+                  ? 'linear-gradient(90deg, #10b981, #059669)'
+                  : 'linear-gradient(90deg, #34d399, #10b981)',
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -8,17 +8,42 @@ export function Header() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header className="bg-gradient-to-r from-emerald-50 to-white border-b border-emerald-100 sticky top-0 z-40 backdrop-blur-sm">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/dashboard" className="text-emerald-700 font-bold text-xl tracking-tight">
-          U-Safe
+        <Link href="/dashboard" className="flex items-center gap-2 group">
+          <svg viewBox="0 0 32 32" className="w-7 h-7 shrink-0" fill="none" aria-hidden>
+            <path
+              d="M16 3 L28 8 L28 18 C28 24 22 29 16 31 C10 29 4 24 4 18 L4 8 Z"
+              fill="url(#shield-grad)"
+              stroke="#059669"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <text
+              x="16" y="21"
+              textAnchor="middle"
+              fontSize="13"
+              fontWeight="800"
+              fontFamily="system-ui, sans-serif"
+              fill="white"
+              letterSpacing="-0.5"
+            >U</text>
+            <defs>
+              <linearGradient id="shield-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#34d399" />
+                <stop offset="100%" stopColor="#059669" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span className="text-emerald-700 font-bold text-xl tracking-tight">
+            U-Safe
+          </span>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1">
           <NavItem href="/history">履歴</NavItem>
-          <NavItem href="/test">テスト発報</NavItem>
-          <AlertNavItem href="/manual">本番発報</AlertNavItem>
+          <AlertNavItem href="/dispatch">手動発報</AlertNavItem>
           <form action={signOut}>
             <button
               type="submit"
@@ -53,11 +78,8 @@ export function Header() {
           <MobileNavItem href="/history" onClick={() => setOpen(false)}>
             履歴
           </MobileNavItem>
-          <MobileNavItem href="/test" onClick={() => setOpen(false)}>
-            テスト発報
-          </MobileNavItem>
-          <MobileAlertNavItem href="/manual" onClick={() => setOpen(false)}>
-            本番発報
+          <MobileAlertNavItem href="/dispatch" onClick={() => setOpen(false)}>
+            手動発報
           </MobileAlertNavItem>
           <form action={signOut} className="px-4">
             <button

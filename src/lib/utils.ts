@@ -16,9 +16,9 @@ export const DISPLAY_EVENT_TYPE_CONFIG: Record<
   DisplayEventType,
   { label: string; className: string }
 > = {
-  test:       { label: '訓練',    className: 'bg-blue-100 text-blue-700' },
-  manual:     { label: '本番発報', className: 'bg-orange-100 text-orange-700' },
-  earthquake: { label: '地震',    className: 'bg-red-100 text-red-700' },
+  test:       { label: '訓練',    className: 'bg-amber-100 text-amber-700' },
+  manual:     { label: '本番発報', className: 'bg-red-100 text-red-700'   },
+  earthquake: { label: '地震',    className: 'bg-red-100 text-red-700'   },
 }
 
 export function getStatusGroup(response: Response | null): StatusGroup {
@@ -72,7 +72,7 @@ export const WORK_STATUS_LABELS: Record<string, string> = {
 
 export const STATUS_GROUP_CONFIG = {
   critical: {
-    label: '要確認',
+    label: '負傷',
     description: '本人またはご家族に負傷・救助が必要な方',
     textColor: 'text-red-700',
     bgColor: 'bg-red-50',
@@ -99,7 +99,7 @@ export const STATUS_GROUP_CONFIG = {
     dotClass: 'bg-gray-400',
   },
   safe: {
-    label: '安全確認済み',
+    label: '無事',
     description: '本人・ご家族ともに安全が確認できている方',
     textColor: 'text-emerald-700',
     bgColor: 'bg-emerald-50',

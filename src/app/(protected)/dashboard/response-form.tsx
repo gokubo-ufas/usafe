@@ -2,11 +2,77 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitResponse } from './actions'
+import type { Response } from '@/types'
 
 type State = { error?: string }
 const INIT: State = {}
 
-function ModalForm({ eventId, onClose }: { eventId: string; onClose: () => void }) {
+const SELF_OPTIONS = [
+  { value: 'safe',        label: '無事' },
+  { value: 'injured',     label: '負傷' },
+  { value: 'need_rescue', label: '救助が必要' },
+]
+
+const FAMILY_OPTIONS = [
+  { value: 'safe',           label: '無事' },
+  { value: 'injured',        label: '負傷' },
+  { value: 'need_rescue',    label: '救助が必要' },
+  { value: 'checking',       label: '安否確認中' },
+  { value: 'not_applicable', label: '対象家族なし' },
+]
+
+const WORK_OPTIONS = [
+  { value: 'available',   label: '対応可能' },
+  { value: 'unavailable', label: '対応困難' },
+]
+
+function RadioGroup({
+  name,
+  legend,
+  options,
+  defaultValue,
+}: {
+  name: string
+  legend: string
+  options: { value: string; label: string }[]
+  defaultValue?: string | null
+}) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-gray-700 mb-2">
+        {legend}<span className="text-red-500 ml-1">*</span>
+      </legend>
+      <div className="space-y-2">
+        {options.map(({ value, label }) => (
+          <label
+            key={value}
+            className="flex items-center gap-3 cursor-pointer rounded-xl border-2 border-gray-200 px-4 py-3 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
+          >
+            <input
+              type="radio"
+              name={name}
+              value={value}
+              required
+              defaultChecked={defaultValue === value}
+              className="w-4 h-4 accent-emerald-700 shrink-0"
+            />
+            <span className="text-sm font-medium text-gray-900">{label}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+function ModalForm({
+  eventId,
+  current,
+  onClose,
+}: {
+  eventId: string
+  current: Response | null
+  onClose: () => void
+}) {
   const [state, formAction, isPending] = useActionState(submitResponse, INIT)
   const wasSubmitting = useRef(false)
 
@@ -20,125 +86,79 @@ function ModalForm({ eventId, onClose }: { eventId: string; onClose: () => void 
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-sm p-6 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-bold text-gray-900 mb-5">安否報告</h2>
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm max-h-[92vh] flex flex-col">
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+          <h2 className="text-base font-bold text-gray-900">安否報告</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="閉じる"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-        <form action={formAction} className="space-y-5">
+        {/* フォーム本体 */}
+        <form action={formAction} className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
           <input type="hidden" name="event_id" value={eventId} />
 
-          <fieldset>
-            <legend className="text-sm font-medium text-gray-700 mb-2">
-              本人の状況 <span className="text-red-500">*</span>
-            </legend>
-            <div className="space-y-1">
-              {[
-                { value: 'safe', label: '無事' },
-                { value: 'injured', label: '負傷' },
-                { value: 'need_rescue', label: '救助が必要' },
-              ].map(({ value, label }) => (
-                <label
-                  key={value}
-                  className="flex items-center gap-3 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-50"
-                >
-                  <input
-                    type="radio"
-                    name="self_status"
-                    value={value}
-                    required
-                    className="w-4 h-4 accent-emerald-700"
-                  />
-                  <span className="text-sm text-gray-800">{label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-gray-700 mb-2">
-              家族の状況 <span className="text-red-500">*</span>
-            </legend>
-            <div className="space-y-1">
-              {[
-                { value: 'safe', label: '無事' },
-                { value: 'injured', label: '負傷' },
-                { value: 'need_rescue', label: '救助が必要' },
-                { value: 'checking', label: '安否確認中' },
-                { value: 'not_applicable', label: '対象家族なし' },
-              ].map(({ value, label }) => (
-                <label
-                  key={value}
-                  className="flex items-center gap-3 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-50"
-                >
-                  <input
-                    type="radio"
-                    name="family_status"
-                    value={value}
-                    required
-                    className="w-4 h-4 accent-emerald-700"
-                  />
-                  <span className="text-sm text-gray-800">{label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-gray-700 mb-2">
-              業務対応 <span className="text-red-500">*</span>
-            </legend>
-            <div className="space-y-1">
-              {[
-                { value: 'available', label: '対応可能' },
-                { value: 'unavailable', label: '対応困難' },
-              ].map(({ value, label }) => (
-                <label
-                  key={value}
-                  className="flex items-center gap-3 cursor-pointer px-2 py-2 rounded-lg hover:bg-gray-50"
-                >
-                  <input
-                    type="radio"
-                    name="work_status"
-                    value={value}
-                    required
-                    className="w-4 h-4 accent-emerald-700"
-                  />
-                  <span className="text-sm text-gray-800">{label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <RadioGroup
+            name="self_status"
+            legend="本人の状況"
+            options={SELF_OPTIONS}
+            defaultValue={current?.self_status}
+          />
+          <RadioGroup
+            name="family_status"
+            legend="家族の状況"
+            options={FAMILY_OPTIONS}
+            defaultValue={current?.family_status}
+          />
+          <RadioGroup
+            name="work_status"
+            legend="業務対応"
+            options={WORK_OPTIONS}
+            defaultValue={current?.work_status}
+          />
 
           <div>
-            <label htmlFor="resp-comment" className="block text-sm font-medium text-gray-700 mb-1">
-              コメント（任意・50文字以内）
+            <label htmlFor="resp-comment" className="block text-sm font-semibold text-gray-700 mb-2">
+              コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
             </label>
             <textarea
               id="resp-comment"
               name="comment"
-              rows={2}
+              rows={3}
               maxLength={50}
-              placeholder="状況を補足するコメント"
-              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+              defaultValue={current?.comment ?? ''}
+              placeholder="状況を補足するコメントがあれば入力してください"
+              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
 
           {state.error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{state.error}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              {state.error}
+            </p>
           )}
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-3 pb-1">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              className="flex-1 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
             >
               キャンセル
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-semibold bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors"
+              className="flex-1 py-3 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors"
             >
               {isPending ? '送信中…' : '送信する'}
             </button>
@@ -149,7 +169,15 @@ function ModalForm({ eventId, onClose }: { eventId: string; onClose: () => void 
   )
 }
 
-export function ResponseForm({ eventId, hasAnswered }: { eventId: string; hasAnswered: boolean }) {
+export function ResponseForm({
+  eventId,
+  hasAnswered,
+  currentResponse,
+}: {
+  eventId: string
+  hasAnswered: boolean
+  currentResponse: Response | null
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -160,7 +188,13 @@ export function ResponseForm({ eventId, hasAnswered }: { eventId: string; hasAns
       >
         {hasAnswered ? '回答を更新する' : '安否を報告する'}
       </button>
-      {open && <ModalForm eventId={eventId} onClose={() => setOpen(false)} />}
+      {open && (
+        <ModalForm
+          eventId={eventId}
+          current={currentResponse}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </>
   )
 }
