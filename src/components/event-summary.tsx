@@ -15,49 +15,68 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
   return (
     <div className="bg-white border-y border-gray-100 overflow-hidden">
       {/* カラーブロック：全情報 */}
-      <div className={`px-4 pt-4 pb-4 ${isDrill ? 'bg-amber-400' : 'bg-red-600'}`}>
-        {/* 回答数（右上） */}
-        <div className={`text-right text-xs mb-3 ${isDrill ? 'text-amber-900/65' : 'text-white/65'}`}>
-          <span className={`font-black text-2xl leading-none ${isDrill ? 'text-amber-950' : 'text-white'}`}>{answeredCount}</span>
-          {' '}/ {totalCount}名 回答済み
-        </div>
+      {(() => {
+        const val   = isDrill ? 'text-amber-950' : 'text-white'
+        const muted = isDrill ? 'text-amber-900/65' : 'text-white/65'
+        return (
+          <div className={`px-4 pt-4 pb-4 ${isDrill ? 'bg-amber-400' : 'bg-red-600'}`}>
+            {/* 種別・警告（左）＋ 回答数（右） */}
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className={`text-sm font-bold mb-0.5 ${val}`}>
+                  {isDrill ? '避難訓練発報' : '本番発報'}
+                </p>
+                <p className={`text-xs font-semibold ${muted}`}>
+                  {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
+                </p>
+              </div>
+              <div className={`text-right shrink-0 ${muted}`}>
+                <span className={`font-black text-2xl leading-none ${val}`}>{answeredCount}</span>
+                <span className="text-sm"> / {totalCount}名</span>
+                <p className="text-[10px] mt-0.5">回答済み</p>
+              </div>
+            </div>
 
-        {/* 地震情報 */}
-        {event.max_intensity != null && (
-          <div className="mb-3">
-            <p className={isDrill ? 'text-amber-950' : 'text-white'}>
-              <span className={`text-xs ${isDrill ? 'text-amber-900/65' : 'text-white/65'}`}>最大震度：</span>
-              <span className="text-4xl font-black">{formatIntensity(event.max_intensity)}</span>
-            </p>
-            {event.epicenter && (
-              <p className={`text-base font-bold mt-0.5 ${isDrill ? 'text-amber-950' : 'text-white'}`}>
-                <span className={`text-xs font-normal ${isDrill ? 'text-amber-900/65' : 'text-white/65'}`}>震源地：</span>
-                {event.epicenter}
+            {/* 中段：震度（左）＋ 発報者/日時（右） */}
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <div>
+                {event.max_intensity != null ? (
+                  <>
+                    <p className={`text-[10px] font-semibold ${muted}`}>最大震度</p>
+                    <p className={`font-black leading-none tracking-tighter ${val}`}
+                       style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
+                      {formatIntensity(event.max_intensity)}
+                    </p>
+                    {event.epicenter && (
+                      <p className={`text-base font-bold mt-1 ${val}`}>{event.epicenter}</p>
+                    )}
+                  </>
+                ) : !event.comment ? (
+                  <p className={`text-base font-bold ${val}`}>安否確認を行ってください</p>
+                ) : null}
+              </div>
+              <div className={`text-right text-xs shrink-0 ${muted}`}>
+                <p className="font-medium">{event.issuer ?? '自動'}</p>
+                <p className="mt-0.5 tabular-nums">{formatDateTimeFull(event.issued_at)}</p>
+              </div>
+            </div>
+
+            {/* 特記事項 */}
+            {event.comment && (
+              <p className={`text-sm mb-3 ${val}`}>
+                <span className={`text-xs ${muted}`}>特記事項：</span>{event.comment}
               </p>
             )}
+
+            {/* 警告文（右下） */}
+            <div className="flex justify-end mt-2">
+              <p className={`text-sm font-bold ${muted}`}>
+                ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
+              </p>
+            </div>
           </div>
-        )}
-
-        {/* 特記事項 */}
-        {event.comment && (
-          <p className={`text-sm mb-3 ${isDrill ? 'text-amber-950' : 'text-white'}`}>
-            <span className={`text-xs ${isDrill ? 'text-amber-900/65' : 'text-white/65'}`}>特記事項：</span>
-            {event.comment}
-          </p>
-        )}
-
-        {/* 発報者・発報日時 */}
-        <p className={`text-xs mb-3 ${isDrill ? 'text-amber-900/65' : 'text-white/65'}`}>
-          発報者：{event.issuer ?? '自動'}　発報日時：{formatDateTimeFull(event.issued_at)}
-        </p>
-
-        {/* ※ 警告（右下ボックス） */}
-        <div className="flex justify-end">
-          <span className={`text-xs font-semibold border px-2 py-1 ${isDrill ? 'text-amber-950 border-amber-600/50' : 'text-white border-white/40'}`}>
-            ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
-          </span>
-        </div>
-      </div>
+        )
+      })()}
 
       {/* 進捗バー */}
       <div className="px-4 py-3 space-y-1.5">
