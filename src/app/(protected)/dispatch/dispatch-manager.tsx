@@ -134,12 +134,12 @@ export function DispatchManager({
           type="button"
           onClick={fetchAndSync}
           disabled={syncPending}
-          className="w-full px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40 text-left"
+          className="w-full px-4 py-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-40 text-center"
         >
-          <span className="text-sm font-medium text-gray-600 block">
+          <span className="text-sm font-semibold text-emerald-700 block">
             {syncPending ? '取得中…' : '社員情報をスプレッドシートから更新'}
           </span>
-          <span className="text-[11px] text-gray-400 tabular-nums mt-0.5 block">
+          <span className="text-[11px] text-emerald-500 tabular-nums mt-0.5 block">
             {lastSyncLabel ? `最終更新：${lastSyncLabel}` : '未取得'}
           </span>
         </button>
@@ -160,7 +160,7 @@ export function DispatchManager({
         <button
           type="button"
           onClick={toggleAll}
-          className="text-xs font-medium text-gray-500 border border-gray-200 px-3 py-1 hover:bg-gray-50 transition-colors"
+          className="text-xs font-medium text-gray-600 border border-gray-300 bg-gray-100 px-3 py-1 hover:bg-gray-200 transition-colors"
         >
           {allActiveChecked ? '全選択を解除' : '全員を選択'}
         </button>
