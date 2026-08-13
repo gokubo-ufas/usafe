@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
 import { signOut } from '@/app/auth/actions'
-import { formatDateTime, formatDateTimeFull, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS, STATUS_GROUP_CONFIG } from '@/lib/utils'
+import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS, STATUS_GROUP_CONFIG } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
 
@@ -98,19 +98,54 @@ export default async function DashboardPage() {
   const myResponseForLatest = latest
     ? (latestByKey.get(`${latest.event_id}:${employee.employee_number}`) ?? null)
     : null
+  const isDrillLatest = latest ? getDisplayEventType(latest) === 'test' : false
 
   return (
     <div className="space-y-6">
       {latest && (
         <section>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
-          <LatestEventPanel event={latest} myResponse={myResponseForLatest} counts={countMap.get(latest.event_id)} />
+          <h2 className="text-base font-bold text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
+          <div className="border-y border-gray-100">
+            <EventCard event={latest} counts={countMap.get(latest.event_id)} />
+            {/* あなたの回答 */}
+            <div className="bg-white border-t border-gray-100 px-4 py-3 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-gray-700">あなたの回答</h3>
+                {myResponseForLatest?.self_status ? (
+                  <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1">✓ 回答済み</span>
+                ) : (
+                  <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 animate-pulse">未回答</span>
+                )}
+              </div>
+              {myResponseForLatest?.self_status && (
+                <div className="grid grid-cols-3 gap-x-2 text-[11px]">
+                  <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponseForLatest.self_status] ?? myResponseForLatest.self_status}</span></span>
+                  <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponseForLatest.family_status ? (FAMILY_STATUS_LABELS[myResponseForLatest.family_status] ?? myResponseForLatest.family_status) : '—'}</span></span>
+                  <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponseForLatest.work_status ? (WORK_STATUS_LABELS[myResponseForLatest.work_status] ?? myResponseForLatest.work_status) : '—'}</span></span>
+                </div>
+              )}
+              <Link
+                href={`/events/${latest.event_id}`}
+                className={cn(
+                  'block w-full py-2.5 text-center text-sm font-semibold transition-colors',
+                  isDrillLatest
+                    ? 'bg-amber-400 text-amber-950 hover:bg-amber-500'
+                    : 'bg-red-500 text-white hover:bg-red-600',
+                )}
+              >
+                {myResponseForLatest?.self_status ? '回答を更新する' : '今すぐ回答する'}
+              </Link>
+            </div>
+          </div>
         </section>
       )}
 
       {past.length > 0 && (
         <section>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 px-4 mb-2">過去の発報</h2>
+          <h2 className="text-base font-bold text-gray-600 px-4 mb-2">
+            過去の発報
+            <span className="text-xs font-normal text-gray-400 ml-2">（回答受付終了）</span>
+          </h2>
           <div className="divide-y divide-gray-100 border-y border-gray-100">
             {past.map((event) => (
               <EventCard key={event.event_id} event={event} counts={countMap.get(event.event_id)} />
@@ -140,106 +175,6 @@ export default async function DashboardPage() {
 }
 
 type CardEvent = Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id' | 'max_intensity' | 'epicenter'>
-
-function LatestEventPanel({
-  event,
-  myResponse,
-  counts,
-}: {
-  event: CardEvent
-  myResponse: Response | null
-  counts?: GroupCounts
-}) {
-  const isDrill = getDisplayEventType(event) === 'test'
-  const answered = (counts?.safe ?? 0) + (counts?.critical ?? 0) + (counts?.checking ?? 0)
-
-  return (
-    <div className="border-y border-gray-100 overflow-hidden">
-      {/* カラーブロック */}
-      <div className={cn('px-4 pt-5 pb-4 text-white', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-
-        {/* 上段：震度（左）＋ 回答数（右） */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="min-w-0">
-            {event.max_intensity != null ? (
-              <>
-                <p className="text-3xl font-black tracking-tight leading-tight">
-                  最大震度 {formatIntensity(event.max_intensity)}
-                </p>
-                {event.epicenter && (
-                  <p className="text-base font-bold mt-1.5">
-                    <span className="text-xs text-white/70 mr-1">震源地</span>
-                    {event.epicenter}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="text-lg font-bold">安否確認を行ってください</p>
-            )}
-          </div>
-          {counts && (
-            <div className="text-right shrink-0">
-              <p className="text-2xl font-black leading-none tabular-nums">
-                {answered}<span className="text-sm font-bold"> / {counts.total}名</span>
-              </p>
-              <p className="text-xs text-white/75 mt-0.5">回答済み</p>
-            </div>
-          )}
-        </div>
-
-        {/* セパレーター */}
-        <div className="border-t border-white/20 mb-3" />
-
-        {/* 特記事項 */}
-        <p className="text-sm font-bold mb-4">
-          <span className="text-[10px] text-white/70 uppercase tracking-wider mr-2">特記事項</span>
-          {event.comment ?? '—'}
-        </p>
-
-        {/* フッター：発報情報（左）＋ 警告文（右） */}
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[11px] text-white/70 tabular-nums leading-relaxed">
-            {formatDateTimeFull(event.issued_at)}<br />
-            発報（{event.issuer ?? '自動発報'}）
-          </p>
-          <p className="text-[11px] font-bold text-right shrink-0">
-            ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
-          </p>
-        </div>
-      </div>
-
-      {/* あなたの回答 */}
-      <div className="bg-white px-4 py-3 space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-gray-700">あなたの回答</h3>
-          {myResponse?.self_status ? (
-            <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1">✓ 回答済み</span>
-          ) : (
-            <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 animate-pulse">未回答</span>
-          )}
-        </div>
-        {myResponse?.self_status && (
-          <div className="grid grid-cols-3 gap-x-2 text-[11px]">
-            <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponse.self_status] ?? myResponse.self_status}</span></span>
-            <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponse.family_status ? (FAMILY_STATUS_LABELS[myResponse.family_status] ?? myResponse.family_status) : '—'}</span></span>
-            <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponse.work_status ? (WORK_STATUS_LABELS[myResponse.work_status] ?? myResponse.work_status) : '—'}</span></span>
-          </div>
-        )}
-        <Link
-          href={`/events/${event.event_id}`}
-          className={cn(
-            'block w-full py-2.5 text-center text-sm font-semibold transition-colors',
-            isDrill
-              ? 'bg-amber-400 text-amber-950 hover:bg-amber-500'
-              : 'bg-red-500 text-white hover:bg-red-600',
-          )}
-        >
-          {myResponse?.self_status ? '回答を更新する' : '今すぐ回答する'}
-        </Link>
-      </div>
-    </div>
-  )
-}
 
 const STATUS_ITEMS = [
   { key: 'safe'      as const, label: '無事'   },
