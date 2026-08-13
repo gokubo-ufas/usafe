@@ -119,14 +119,6 @@ export function DispatchManager({
     )
   }
 
-  // 部署でグループ化
-  const deptMap = new Map<string, Employee[]>()
-  for (const emp of activeEmployees) {
-    const dept = emp.department ?? '部署未設定'
-    if (!deptMap.has(dept)) deptMap.set(dept, [])
-    deptMap.get(dept)!.push(emp)
-  }
-
   const lastSyncLabel = lastUpdatedAt
     ? new Date(lastUpdatedAt).toLocaleString('ja-JP', {
         timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
@@ -135,108 +127,23 @@ export function DispatchManager({
 
   return (
     <div>
-      {/* 発報ボタン */}
-      <div className="grid grid-cols-2 gap-px bg-gray-200 border-b border-gray-200">
-        <button
-          type="button"
-          onClick={() => setModal('drill')}
-          disabled={checked.size === 0}
-          className="flex flex-col items-center justify-center gap-1.5 py-6 bg-amber-400 hover:bg-amber-500 text-amber-950 transition-colors disabled:opacity-40"
-        >
-          <span className="text-xl leading-none">🟡</span>
-          <span className="text-sm font-bold">訓練発報</span>
-          <span className="text-[10px] text-amber-800/70">{checked.size}名に送信</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setModal('production')}
-          disabled={checked.size === 0}
-          className="flex flex-col items-center justify-center gap-1.5 py-6 bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-40"
-        >
-          <span className="text-xl leading-none">🔴</span>
-          <span className="text-sm font-bold">本番発報</span>
-          <span className="text-[10px] text-white/60">{checked.size}名に送信</span>
-        </button>
-      </div>
-
-      {/* 対象者ヘッダー */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-white">
-        <span className="text-xs font-bold text-gray-500">
-          発報対象
-          <span className="text-emerald-600 tabular-nums ml-1.5">{checked.size}</span>
-          <span className="text-gray-400 font-normal"> / {activeEmployees.length}名</span>
-        </span>
-        <button
-          type="button"
-          onClick={toggleAll}
-          className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
-        >
-          {allActiveChecked ? '全解除' : '全選択'}
-        </button>
-      </div>
-
-      {/* 社員リスト（部署ごと） */}
-      <div className="bg-white">
-        {[...deptMap.entries()].map(([dept, emps]) => (
-          <div key={dept}>
-            <div className="px-4 py-1.5 bg-gray-50 border-y border-gray-100">
-              <span className="text-[10px] font-semibold text-gray-400 tracking-wide">{dept}</span>
-            </div>
-            {emps.map(emp => (
-              <label
-                key={emp.employee_number}
-                className="flex items-center gap-3.5 px-4 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50/80 transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked.has(emp.employee_number)}
-                  onChange={() => toggleOne(emp.employee_number)}
-                  className="w-4 h-4 accent-emerald-600 shrink-0"
-                />
-                <span className="text-sm font-medium text-gray-800">{emp.name}</span>
-              </label>
-            ))}
-          </div>
-        ))}
-
-        {retiredEmployees.length > 0 && (
-          <div>
-            <div className="px-4 py-1.5 bg-gray-50 border-y border-gray-100">
-              <span className="text-[10px] font-semibold text-gray-300 tracking-wide">退職済み（対象外）</span>
-            </div>
-            {retiredEmployees.map(emp => (
-              <div
-                key={emp.employee_number}
-                className="flex items-center gap-3.5 px-4 py-3 border-b border-gray-100 opacity-35"
-              >
-                <span className="w-4 h-4 shrink-0" />
-                <span className="text-sm text-gray-500 line-through">{emp.name}</span>
-                {emp.department && (
-                  <span className="text-[10px] text-gray-400 ml-auto">{emp.department}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 社員情報同期（セカンダリ） */}
-      <div className="px-4 pt-4 pb-8 space-y-2">
+      {/* 1. 社員情報取得 */}
+      <div className="px-4 pt-4 pb-3 space-y-1.5">
         <button
           type="button"
           onClick={fetchAndSync}
           disabled={syncPending}
-          className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40"
+          className="w-full flex items-center justify-between px-4 py-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-40"
         >
-          <span className="text-xs font-medium text-gray-500">
-            {syncPending ? '取得中…' : '社員情報をスプレッドシートから更新'}
+          <span className="text-sm font-semibold text-emerald-700">
+            {syncPending ? '取得中…' : '社員情報を取得・最新化'}
           </span>
-          <span className="text-[10px] text-gray-400 shrink-0 ml-3">
+          <span className="text-[11px] text-emerald-500 shrink-0 ml-3">
             {lastSyncLabel ? `最終 ${lastSyncLabel}` : '未取得'}
           </span>
         </button>
         {syncResult?.ok && (
-          <p className="text-xs text-center text-emerald-600">更新が完了しました。</p>
+          <p className="text-xs text-center text-emerald-600">最新化が完了しました。</p>
         )}
         {syncResult && !syncResult.ok && (
           <div className="border border-amber-200 bg-amber-50 px-4 py-3 space-y-0.5">
@@ -244,6 +151,77 @@ export function DispatchManager({
             <p className="text-xs text-amber-700">現在のデータで発報できますが、内容を確認してから発報してください。</p>
           </div>
         )}
+      </div>
+
+      {/* 2. 対象者一覧 */}
+      <div className="flex items-center justify-between px-4 py-2 border-t border-b border-gray-100 bg-white">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={allActiveChecked}
+            onChange={toggleAll}
+            className="w-4 h-4 accent-emerald-600 cursor-pointer"
+          />
+          <span className="text-xs font-bold text-gray-500">
+            部署
+          </span>
+        </div>
+        <span className="text-xs text-gray-400 tabular-nums">
+          {checked.size} / {activeEmployees.length}名 選択中
+        </span>
+      </div>
+
+      <div className="bg-white divide-y divide-gray-100 border-b border-gray-100">
+        {employees.map(emp => emp.is_active ? (
+          <label
+            key={emp.employee_number}
+            className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={checked.has(emp.employee_number)}
+              onChange={() => toggleOne(emp.employee_number)}
+              className="w-4 h-4 accent-emerald-600 shrink-0"
+            />
+            <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{emp.department ?? '—'}</span>
+            <span className="text-sm font-medium text-gray-800 truncate">{emp.name}</span>
+          </label>
+        ) : (
+          <div
+            key={emp.employee_number}
+            className="flex items-center gap-3 px-4 py-2.5 opacity-30"
+          >
+            <span className="w-4 h-4 shrink-0" />
+            <span className="text-xs text-gray-400 w-24 shrink-0 truncate">{emp.department ?? '—'}</span>
+            <span className="text-sm text-gray-400 line-through truncate">{emp.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {retiredEmployees.length > 0 && (
+        <p className="text-[10px] text-gray-400 text-center py-2">
+          退職済み {retiredEmployees.length}名は発報対象外
+        </p>
+      )}
+
+      {/* 3. 発報ボタン */}
+      <div className="grid grid-cols-2 gap-px bg-gray-200 border-t border-gray-200 mt-4">
+        <button
+          type="button"
+          onClick={() => setModal('drill')}
+          disabled={checked.size === 0}
+          className="flex items-center justify-center gap-2 py-5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-amber-950 transition-colors disabled:opacity-40"
+        >
+          訓練発報
+        </button>
+        <button
+          type="button"
+          onClick={() => setModal('production')}
+          disabled={checked.size === 0}
+          className="flex items-center justify-center gap-2 py-5 text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-40"
+        >
+          本番発報
+        </button>
       </div>
 
       {modal && (
@@ -300,7 +278,6 @@ function DispatchModal({
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >
         <div className="bg-white shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
-          {/* モーダルヘッダー */}
           <div className={cn(
             'px-5 pt-4 pb-3 border-b border-white/20 shrink-0',
             isDrill ? 'bg-amber-400' : 'bg-red-500',
