@@ -42,7 +42,7 @@ function RadioGroup({
       <legend className="text-sm font-semibold text-gray-700 mb-1.5">
         {legend}<span className="text-red-500 ml-1">*</span>
       </legend>
-      <div className="flex rounded-xl overflow-hidden border border-gray-200 divide-x divide-gray-200">
+      <div className="flex rounded-none overflow-hidden border border-gray-200 divide-x divide-gray-200">
         {options.map(({ value, label }) => (
           <label
             key={value}
@@ -86,13 +86,13 @@ function ModalForm({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs max-h-[92vh] flex flex-col">
+      <div className="bg-white rounded-none shadow-2xl w-full sm:max-w-xs max-h-[92vh] flex flex-col">
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
           <h2 className="text-base font-bold text-gray-900">安否報告</h2>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-none text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label="閉じる"
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -118,23 +118,23 @@ function ModalForm({
               maxLength={50}
               defaultValue={current?.comment ?? ''}
               placeholder="状況を補足するコメントがあれば"
-              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
 
           {state.error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-none px-3 py-2">
               {state.error}
             </p>
           )}
 
           <div className="flex gap-3 pb-1">
             <button type="button" onClick={onClose} disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors">
+              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-none hover:bg-gray-200 disabled:opacity-50 transition-colors">
               キャンセル
             </button>
             <button type="submit" disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors">
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-none hover:bg-emerald-800 disabled:opacity-50 transition-colors">
               {isPending ? '送信中…' : '送信する'}
             </button>
           </div>
@@ -159,7 +159,7 @@ export function ResponseForm({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full py-2.5 bg-emerald-700 text-white text-sm font-semibold rounded-xl hover:bg-emerald-800 transition-colors"
+        className="w-full py-2.5 bg-emerald-700 text-white text-sm font-semibold rounded-none hover:bg-emerald-800 transition-colors"
       >
         {hasAnswered ? '回答を更新する' : '安否を報告する'}
       </button>

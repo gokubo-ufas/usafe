@@ -44,7 +44,7 @@ function RadioGroup({
       <legend className="text-sm font-semibold text-gray-700 mb-1.5">
         {legend}<span className="text-red-500 ml-1">*</span>
       </legend>
-      <div className="flex rounded-xl overflow-hidden border border-gray-200 divide-x divide-gray-200">
+      <div className="flex rounded-none overflow-hidden border border-gray-200 divide-x divide-gray-200">
         {options.map(({ value, label }) => (
           <label
             key={value}
@@ -119,12 +119,12 @@ export function InlineResponseForm({ event }: { event: Event }) {
               rows={2}
               maxLength={50}
               placeholder="状況を補足するコメントがあれば"
-              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
 
           {state.error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-none px-3 py-2">
               {state.error}
             </p>
           )}
@@ -133,7 +133,7 @@ export function InlineResponseForm({ event }: { event: Event }) {
             type="submit"
             disabled={isPending}
             className={cn(
-              'w-full py-3.5 text-sm font-bold rounded-xl transition-colors disabled:opacity-50',
+              'w-full py-3.5 text-sm font-bold rounded-none transition-colors disabled:opacity-50',
               isDrill
                 ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
                 : 'bg-red-500 hover:bg-red-600 text-white',

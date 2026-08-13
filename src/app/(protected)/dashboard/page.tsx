@@ -109,14 +109,14 @@ export default async function DashboardPage() {
       <div className="flex gap-3 px-4">
         <Link
           href="/dispatch"
-          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-200 rounded-none hover:bg-red-50 transition-colors"
         >
           発報管理
         </Link>
         <form action={signOut} className="flex-1">
           <button
             type="submit"
-            className="w-full py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+            className="w-full py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-none hover:bg-gray-50 transition-colors"
           >
             ログアウト
           </button>

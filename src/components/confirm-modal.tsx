@@ -38,7 +38,7 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+      <div className="relative bg-white rounded-none shadow-xl p-6 w-full max-w-sm">
         <h2 className="font-bold text-gray-900 mb-3 text-base">{title}</h2>
         <p className="text-sm text-gray-600 mb-6 whitespace-pre-line leading-relaxed">{message}</p>
         <div className="flex gap-3 justify-end">
@@ -55,7 +55,7 @@ export function ConfirmModal({
             onClick={onConfirm}
             disabled={isPending}
             className={cn(
-              'px-4 py-2 text-sm font-medium rounded-xl transition-colors disabled:opacity-50',
+              'px-4 py-2 text-sm font-medium rounded-none transition-colors disabled:opacity-50',
               danger   ? 'bg-red-500    text-white hover:bg-red-600'   :
               warning  ? 'bg-amber-400  text-amber-950 hover:bg-amber-500' :
                          'bg-emerald-700 text-white hover:bg-emerald-800',

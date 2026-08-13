@@ -97,7 +97,7 @@ export function DispatchManager({
   if (successState?.success) {
     return (
       <div className={cn(
-        'rounded-2xl border p-6 space-y-4',
+        'rounded-none border p-6 space-y-4',
         successState.slackFailed ? 'bg-amber-50 border-amber-300' : 'bg-emerald-50 border-emerald-300',
       )}>
         <div className="flex items-start gap-3">
@@ -106,7 +106,7 @@ export function DispatchManager({
             {successState.success}
           </p>
         </div>
-        <Link href="/dashboard" className="block w-full py-3 text-center text-sm font-semibold rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+        <Link href="/dashboard" className="block w-full py-3 text-center text-sm font-semibold rounded-none bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
           ダッシュボードへ戻る
         </Link>
       </div>
@@ -121,7 +121,7 @@ export function DispatchManager({
           type="button"
           onClick={() => setModal('drill')}
           disabled={checked.size === 0}
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-950 rounded-xl transition-colors disabled:opacity-40"
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-950 rounded-none transition-colors disabled:opacity-40"
         >
           🟡 訓練発報
         </button>
@@ -129,7 +129,7 @@ export function DispatchManager({
           type="button"
           onClick={() => setModal('production')}
           disabled={checked.size === 0}
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-40"
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-500 hover:bg-red-600 text-white rounded-none transition-colors disabled:opacity-40"
         >
           🔴 本番発報
         </button>
@@ -142,7 +142,7 @@ export function DispatchManager({
             type="button"
             onClick={fetchAndSync}
             disabled={syncPending}
-            className="w-full flex flex-col items-center justify-center gap-0.5 py-3 px-4 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-40"
+            className="w-full flex flex-col items-center justify-center gap-0.5 py-3 px-4 rounded-none bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-40"
           >
             <span className="text-sm font-semibold text-emerald-700">
               {syncPending ? '取得中…' : '社員SpreadSheetを取得し最新化'}
@@ -157,7 +157,7 @@ export function DispatchManager({
             <p className="text-xs text-center text-emerald-600">最新化が完了しました。</p>
           )}
           {syncResult && !syncResult.ok && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 space-y-0.5">
+            <div className="rounded-none bg-amber-50 border border-amber-200 px-4 py-3 space-y-0.5">
               <p className="text-xs font-semibold text-amber-800">スプレッドシートとの同期に失敗しました</p>
               <p className="text-xs text-amber-700">現在アプリに登録されている社員情報で発報できますが、発報先の内容を確認してから発報してください。</p>
             </div>
@@ -180,7 +180,7 @@ export function DispatchManager({
           </button>
           <span className="text-sm text-gray-500">{checked.size}名を選択中</span>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden">
           <div className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
             <input
               type="checkbox"
@@ -257,10 +257,10 @@ function DispatchModal({
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
-        <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
+        <div className="bg-white rounded-none shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
           <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
             <h2 className="text-base font-bold text-gray-900">{isDrill ? '🟡 避難訓練発報' : '🔴 本番発報'}</h2>
-            <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+            <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-gray-400 hover:text-gray-600 hover:bg-gray-100">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -275,7 +275,7 @@ function DispatchModal({
               <textarea
                 rows={3} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
                 placeholder={isDrill ? '訓練の目的や注意事項を入力してください' : '緊急事態の状況や対応指示を入力してください'}
-                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
               />
             </div>
             {!isDrill && (
@@ -284,10 +284,10 @@ function DispatchModal({
                 <span className="text-sm text-gray-700 leading-snug">ホームと履歴で自動発報がされていないことを確認しました。本番発報することに同意します。</span>
               </label>
             )}
-            {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">{error}</p>}
+            {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-none px-3 py-2.5">{error}</p>}
             <div className="flex gap-3 pb-1">
-              <button type="button" onClick={onClose} disabled={isPending} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50">キャンセル</button>
-              <button type="button" onClick={() => setShowConfirm(true)} disabled={isPending || !canSubmit} className={cn('flex-1 py-2.5 text-sm font-semibold rounded-xl disabled:opacity-40 transition-colors', isDrill ? 'bg-amber-400 hover:bg-amber-500 text-amber-950' : 'bg-red-500 hover:bg-red-600 text-white')}>
+              <button type="button" onClick={onClose} disabled={isPending} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-none hover:bg-gray-200 disabled:opacity-50">キャンセル</button>
+              <button type="button" onClick={() => setShowConfirm(true)} disabled={isPending || !canSubmit} className={cn('flex-1 py-2.5 text-sm font-semibold rounded-none disabled:opacity-40 transition-colors', isDrill ? 'bg-amber-400 hover:bg-amber-500 text-amber-950' : 'bg-red-500 hover:bg-red-600 text-white')}>
                 {isPending ? '発報中…' : '発報する'}
               </button>
             </div>

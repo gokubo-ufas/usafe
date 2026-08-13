@@ -174,7 +174,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
           <select
             value={dept}
             onChange={(e) => setDept(e.target.value)}
-            className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+            className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
           >
             <option value="">全部署</option>
             {departments.map((d) => (
