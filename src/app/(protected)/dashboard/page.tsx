@@ -145,43 +145,59 @@ function LatestEventPanel({
 
   return (
     <div className="border-y border-gray-100 overflow-hidden">
-      {/* グレーヘッダー */}
-      <div className="bg-white px-4 pt-4 pb-3 border-b border-gray-100">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className={cn('text-xs font-bold px-1.5 py-0.5', isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
-              {isDrill ? '🟡 訓練' : '🔴 本番'}
-            </span>
-            <span className="text-gray-400 text-xs tabular-nums">{formatDateTime(event.issued_at)}</span>
+      {/* カラーブロック：全情報 */}
+      <div className={cn('px-4 pt-4 pb-4 space-y-3', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
+        {/* 種別・日時・回答数・警告 */}
+        <div>
+          <div className="flex items-baseline justify-between gap-2">
+            <div>
+              <span className={cn('text-sm font-bold', isDrill ? 'text-amber-950' : 'text-white')}>
+                {isDrill ? '避難訓練発報' : '本番発報'}
+              </span>
+              <span className={cn('ml-2 text-xs tabular-nums', isDrill ? 'text-amber-900/60' : 'text-white/60')}>
+                {formatDateTime(event.issued_at)}
+              </span>
+            </div>
+            {counts && (
+              <span className={cn('text-xs tabular-nums shrink-0', isDrill ? 'text-amber-900/70' : 'text-white/70')}>
+                <span className={cn('font-black text-lg leading-none', isDrill ? 'text-amber-950' : 'text-white')}>{answered}</span>
+                {' '}/ {counts.total}名
+              </span>
+            )}
           </div>
-          {counts && (
-            <span className="text-gray-500 text-xs tabular-nums shrink-0">
-              <span className="font-black text-gray-900">{answered}</span> / {counts.total}名
-            </span>
-          )}
-        </div>
-        <p className="text-sm font-bold text-gray-800 mt-1">
-          {isDrill ? '⚠️ これは避難訓練です' : '🚨 これは訓練ではありません'}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">発報者：{event.issuer ?? '自動'}</p>
-      </div>
-
-      {/* 地震情報（カラー） */}
-      {event.max_intensity != null ? (
-        <div className={cn('px-4 py-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-          <p className="text-white/80 text-xs font-semibold">最大震度</p>
-          <p className="text-white font-black leading-none tracking-tighter mt-0.5"
-             style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
-            {formatIntensity(event.max_intensity)}
+          <p className={cn('text-xs font-semibold mt-0.5', isDrill ? 'text-amber-900/70' : 'text-white/75')}>
+            {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
           </p>
-          {event.epicenter && <p className="text-white text-base font-bold mt-1">{event.epicenter}</p>}
-          {event.comment && <p className="text-white/80 text-sm mt-2">{event.comment}</p>}
         </div>
-      ) : event.comment ? (
-        <div className={cn('px-4 py-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-          <p className="text-white text-base font-bold leading-snug">{event.comment}</p>
-        </div>
-      ) : null}
+
+        {/* 地震情報 */}
+        {event.max_intensity != null && (
+          <div>
+            <p className={cn('text-[10px] font-semibold tracking-wide', isDrill ? 'text-amber-900/60' : 'text-white/60')}>最大震度</p>
+            <p className={cn('font-black leading-none tracking-tighter mt-0.5', isDrill ? 'text-amber-950' : 'text-white')}
+               style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
+              {formatIntensity(event.max_intensity)}
+            </p>
+            {event.epicenter && (
+              <p className={cn('text-base font-bold mt-1', isDrill ? 'text-amber-900' : 'text-white')}>
+                {event.epicenter}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* コメント */}
+        {event.comment && (
+          <p className={cn('text-sm leading-relaxed', isDrill ? 'text-amber-900' : 'text-white')}>
+            {event.comment}
+          </p>
+        )}
+
+        {/* 発報者 */}
+        <p className={cn('text-xs pt-1 border-t', isDrill ? 'text-amber-900/50 border-amber-500/40' : 'text-white/50 border-white/20')}>
+          発報者：{event.issuer ?? '自動'}
+        </p>
+      </div>
 
       {/* あなたの回答 */}
       <div className="bg-white px-4 py-3 space-y-2.5">

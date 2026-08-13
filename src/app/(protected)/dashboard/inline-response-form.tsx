@@ -69,38 +69,61 @@ export function InlineResponseForm({ event }: { event: Event }) {
   const [state, formAction, isPending] = useActionState(submitResponse, INIT)
   const isDrill = event.event_type === 'test'
 
+  const tc = isDrill
+    ? { title: 'text-amber-950', sub: 'text-amber-900/70', label: 'text-amber-900/60', big: 'text-amber-950', body: 'text-amber-900' }
+    : { title: 'text-white',     sub: 'text-white/75',     label: 'text-white/60',     big: 'text-white',     body: 'text-white'     }
+
   return (
     <div>
-      {/* グレーヘッダー */}
-      <div className="bg-white px-4 pt-5 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-2 mb-1">
-          <span className={cn('text-xs font-bold px-1.5 py-0.5', isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
-            {isDrill ? '🟡 訓練' : '🔴 本番'}
-          </span>
-          <span className="text-gray-400 text-xs tabular-nums">{formatDateTime(event.issued_at)}</span>
-        </div>
-        <p className="text-sm font-bold text-gray-800 leading-snug">
-          {isDrill ? '⚠️ これは避難訓練です' : '🚨 これは訓練ではありません'}
-        </p>
-        <p className="text-xs text-gray-400 mt-1.5">発報者：{event.issuer ?? '自動'}</p>
-      </div>
+      {/* カラーブロック：全情報 */}
+      <div className={cn('px-4 pt-5 pb-5 space-y-3', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
 
-      {/* 地震情報（カラー） */}
-      {event.max_intensity != null ? (
-        <div className={cn('px-4 py-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-          <p className="text-white/80 text-xs font-semibold mb-0.5">最大震度</p>
-          <p className="text-white font-black leading-none tracking-tighter"
-             style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
-            {formatIntensity(event.max_intensity)}
+        {/* 種別・日時・警告 */}
+        <div>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={cn('text-sm font-bold', tc.title)}>
+              {isDrill ? '避難訓練発報' : '本番発報'}
+            </span>
+            <span className={cn('text-xs tabular-nums', tc.sub)}>
+              {formatDateTime(event.issued_at)}
+            </span>
+          </div>
+          <p className={cn('text-xs font-semibold mt-0.5', tc.sub)}>
+            {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
           </p>
-          {event.epicenter && <p className="text-white text-lg font-bold mt-2">{event.epicenter}</p>}
-          {event.comment && <p className="text-white/80 text-sm mt-2">{event.comment}</p>}
         </div>
-      ) : event.comment ? (
-        <div className={cn('px-4 py-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-          <p className="text-white text-xl font-bold leading-snug">{event.comment}</p>
-        </div>
-      ) : null}
+
+        {/* 地震情報 */}
+        {event.max_intensity != null && (
+          <div>
+            <p className={cn('text-[10px] font-semibold tracking-wide', tc.label)}>最大震度</p>
+            <p className={cn('font-black leading-none tracking-tighter', tc.big)}
+               style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
+              {formatIntensity(event.max_intensity)}
+            </p>
+            {event.epicenter && (
+              <p className={cn('text-lg font-bold mt-1', tc.body)}>{event.epicenter}</p>
+            )}
+          </div>
+        )}
+
+        {/* コメント（手動発報・訓練の備考） */}
+        {event.comment && (
+          <p className={cn('text-sm leading-relaxed', tc.body)}>
+            {event.comment}
+          </p>
+        )}
+
+        {/* 震度もコメントもない場合 */}
+        {event.max_intensity == null && !event.comment && (
+          <p className={cn('text-base font-bold', tc.title)}>安否確認を行ってください</p>
+        )}
+
+        {/* 発報者 */}
+        <p className={cn('text-xs pt-1 border-t', isDrill ? 'text-amber-900/50 border-amber-500/40' : 'text-white/50 border-white/20')}>
+          発報者：{event.issuer ?? '自動'}
+        </p>
+      </div>
 
       {/* 回答フォーム */}
       <div className="bg-white px-4 py-5 space-y-4">
