@@ -134,13 +134,13 @@ export function DispatchManager({
           type="button"
           onClick={fetchAndSync}
           disabled={syncPending}
-          className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40"
+          className="w-full px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40 text-left"
         >
-          <span className="text-sm font-medium text-gray-600">
+          <span className="text-sm font-medium text-gray-600 block">
             {syncPending ? '取得中…' : '社員情報をスプレッドシートから更新'}
           </span>
-          <span className="text-[11px] text-gray-400 shrink-0 ml-3 tabular-nums">
-            {lastSyncLabel ? `最終 ${lastSyncLabel}` : '未取得'}
+          <span className="text-[11px] text-gray-400 tabular-nums mt-0.5 block">
+            {lastSyncLabel ? `最終更新：${lastSyncLabel}` : '未取得'}
           </span>
         </button>
         {syncResult?.ok && (
@@ -160,7 +160,7 @@ export function DispatchManager({
         <button
           type="button"
           onClick={toggleAll}
-          className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+          className="text-xs font-medium text-gray-500 border border-gray-200 px-3 py-1 hover:bg-gray-50 transition-colors"
         >
           {allActiveChecked ? '全選択を解除' : '全員を選択'}
         </button>
@@ -187,7 +187,7 @@ export function DispatchManager({
         {activeEmployees.map(emp => (
           <label
             key={emp.employee_number}
-            className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
           >
             <input
               type="checkbox"
@@ -197,7 +197,7 @@ export function DispatchManager({
             />
             <span className="text-xs text-gray-500 truncate">{emp.department ?? '—'}</span>
             <span className="text-sm font-medium text-gray-800 truncate">{emp.name}</span>
-            <span className="text-[10px] font-semibold text-emerald-600 text-center">在籍中</span>
+            <span className="text-xs font-medium text-emerald-600 text-center">在籍中</span>
           </label>
         ))}
       </div>
@@ -212,12 +212,12 @@ export function DispatchManager({
             {retiredEmployees.map(emp => (
               <div
                 key={emp.employee_number}
-                className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-3 opacity-35"
+                className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-2 opacity-35"
               >
                 <span className="w-4 h-4" />
                 <span className="text-xs text-gray-400 truncate">{emp.department ?? '—'}</span>
                 <span className="text-sm text-gray-400 line-through truncate">{emp.name}</span>
-                <span className="text-[10px] font-semibold text-gray-400 text-center">退職済</span>
+                <span className="text-xs font-medium text-gray-400 text-center">退職済</span>
               </div>
             ))}
           </div>
@@ -230,7 +230,7 @@ export function DispatchManager({
           type="button"
           onClick={() => setModal('drill')}
           disabled={checked.size === 0}
-          className="py-4 text-sm font-bold border-2 border-amber-300 text-amber-700 bg-white hover:bg-amber-50 transition-colors disabled:opacity-40"
+          className="py-4 text-sm font-bold bg-amber-400 text-amber-950 hover:bg-amber-500 transition-colors disabled:opacity-40"
         >
           訓練発報
         </button>
