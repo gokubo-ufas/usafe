@@ -109,32 +109,47 @@ export function DispatchManager({
   return (
     <div className="space-y-4">
 
-      {/* ── 社員マスタ更新 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-800">社員マスタ更新</h2>
+      {/* ── 社員一覧 ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+          <div>
+            <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
+            {lastUpdatedAt && (
+              <p className="text-[10px] text-gray-400 mt-0.5">
+                最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
+                  timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
+                  day: '2-digit', hour: '2-digit', minute: '2-digit',
+                })}　在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名
+              </p>
+            )}
+          </div>
           <button
             type="button"
             onClick={fetchGasPreview}
             disabled={gasPending}
-            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-40 transition-colors"
+            className="text-xs font-medium text-sky-600 hover:text-sky-700 disabled:opacity-40 transition-colors"
           >
-            {gasPending ? '取得中…' : 'スプレッドシートから取得'}
+            {gasPending ? '取得中…' : 'スプシから更新'}
           </button>
         </div>
 
+        {/* GAS同期差分 */}
         {preview && !preview.ok && (
-          <p className="text-xs text-red-500">{preview.error}</p>
+          <div className="px-4 py-2 bg-red-50 border-b border-red-100">
+            <p className="text-xs text-red-500">{preview.error}</p>
+          </div>
         )}
 
         {preview?.ok && (
-          <div className="space-y-3">
+          <div className="px-4 py-3 border-b border-gray-100 space-y-2">
             {preview.diff.length === 0 ? (
               <p className="text-xs text-emerald-600">変更はありません（スプレッドシートと一致しています）</p>
             ) : (
               <>
                 <p className="text-xs text-gray-500">{preview.diff.length}件の変更が検出されました</p>
-                <div className="rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                <div className="rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-48 overflow-y-auto">
                   {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
                 </div>
                 {syncResult?.ok ? (
@@ -146,7 +161,7 @@ export function DispatchManager({
                       type="button"
                       onClick={applySync}
                       disabled={syncPending}
-                      className="w-full py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 rounded-xl transition-colors"
+                      className="w-full py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 rounded-xl transition-colors"
                     >
                       {syncPending ? '同期中…' : '同期を適用する'}
                     </button>
@@ -156,23 +171,6 @@ export function DispatchManager({
             )}
           </div>
         )}
-      </div>
-
-      {/* ── 社員一覧 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-
-        {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-          <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
-          {lastUpdatedAt && (
-            <p className="text-[10px] text-gray-400 mt-0.5">
-              最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
-                day: '2-digit', hour: '2-digit', minute: '2-digit',
-              })}　在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名
-            </p>
-          )}
-        </div>
 
         {/* テーブルヘッダー */}
         <div className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
