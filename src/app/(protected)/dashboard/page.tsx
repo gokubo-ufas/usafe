@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
+import { signOut } from '@/app/auth/actions'
 import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
@@ -87,7 +88,6 @@ export default async function DashboardPage() {
     else c.unanswered++
   }
 
-  const latestId = latestEvent.event_id
   const [latest, ...past] = events
 
   return (
@@ -107,6 +107,24 @@ export default async function DashboardPage() {
           ))}
         </section>
       )}
+
+      {/* アクション */}
+      <div className="flex gap-3 pt-2">
+        <Link
+          href="/dispatch"
+          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-300 rounded-xl hover:bg-red-50 transition-colors"
+        >
+          発報管理
+        </Link>
+        <form action={signOut} className="flex-1">
+          <button
+            type="submit"
+            className="w-full py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+          >
+            ログアウト
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
