@@ -110,9 +110,7 @@ export function DispatchManager({
     <div className="space-y-4">
 
       {/* ── 発報 ── */}
-      <div>
-        <h2 className="text-sm font-bold text-gray-800 mb-2">発報</h2>
-        <div className="flex gap-3">
+      <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setModal('drill')}
@@ -129,7 +127,6 @@ export function DispatchManager({
           >
             🔴 本番発報
           </button>
-        </div>
       </div>
 
       {/* ── スプレッドシート取得 ── */}
@@ -146,7 +143,7 @@ export function DispatchManager({
           type="button"
           onClick={fetchGasPreview}
           disabled={gasPending}
-          className="w-full py-3 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 rounded-xl transition-colors"
+          className="w-full py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-xl transition-colors"
         >
           {gasPending ? '取得中…' : '社員情報をスプレッドシートから取得'}
         </button>
@@ -174,7 +171,7 @@ export function DispatchManager({
                       type="button"
                       onClick={applySync}
                       disabled={syncPending}
-                      className="w-full py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 rounded-xl transition-colors"
+                      className="w-full py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-xl transition-colors"
                     >
                       {syncPending ? '同期中…' : '同期を適用する'}
                     </button>
