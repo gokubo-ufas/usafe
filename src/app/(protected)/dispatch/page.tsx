@@ -5,10 +5,9 @@ export default async function DispatchPage() {
   const admin = createAdminClient()
   const { data } = await admin
     .from('employees')
-    .select('employee_number, name, department, updated_at')
-    .eq('is_active', true)
-    .order('department', { nullsFirst: false })
+    .select('employee_number, name, department, is_active, updated_at')
     .order('employee_number')
+    .order('department', { nullsFirst: false })
 
   const employees = data ?? []
 
