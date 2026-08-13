@@ -16,9 +16,9 @@ export const DISPLAY_EVENT_TYPE_CONFIG: Record<
   DisplayEventType,
   { label: string; className: string }
 > = {
-  test:       { label: '訓練', className: 'bg-amber-400/20 text-amber-300 border border-amber-400/30' },
-  manual:     { label: '本番', className: 'bg-red-500/20 text-red-300 border border-red-500/30'       },
-  earthquake: { label: '本番', className: 'bg-red-500/20 text-red-300 border border-red-500/30'       },
+  test:       { label: '🟡 訓練', className: 'bg-amber-400 text-amber-950' },
+  manual:     { label: '🔴 本番', className: 'bg-red-500 text-white'       },
+  earthquake: { label: '🔴 本番', className: 'bg-red-500 text-white'       },
 }
 
 export function getStatusGroup(response: Response | null): StatusGroup {

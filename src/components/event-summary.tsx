@@ -15,32 +15,32 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
   const pct = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
   return (
-    <div className="bg-white/[0.06] backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
-      <div className={`h-1 w-full ${isDrill ? 'bg-amber-400' : 'bg-red-500'}`} />
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className={`h-1.5 w-full ${isDrill ? 'bg-amber-400' : 'bg-red-500'}`} />
 
       <div className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 space-y-1.5">
             <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0 ${className}`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shrink-0 ${className}`}>
                 {label}
               </span>
-              <span className="text-xs text-white/40 tabular-nums whitespace-nowrap">{formatDateTime(event.issued_at)}</span>
+              <span className="text-xs text-gray-400 tabular-nums whitespace-nowrap">{formatDateTime(event.issued_at)}</span>
             </div>
             {event.comment && (
-              <p className="text-base font-bold text-white tracking-tight">{event.comment}</p>
+              <p className="text-base font-bold text-gray-900 tracking-tight">{event.comment}</p>
             )}
-            <p className="text-xs text-white/40">
-              発報者：<span className="font-medium text-white/60">{event.issuer ?? '自動'}</span>
+            <p className="text-xs text-gray-400">
+              発報者：<span className="font-medium text-gray-600">{event.issuer ?? '自動'}</span>
             </p>
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-2xl sm:text-3xl font-bold tabular-nums text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 tracking-tight">
               {answeredCount}
-              <span className="text-sm sm:text-base font-normal text-white/40 ml-1">/ {totalCount}名</span>
+              <span className="text-sm sm:text-base font-normal text-gray-400 ml-1">/ {totalCount}名</span>
             </div>
-            <div className="text-xs text-white/40 mt-0.5">回答済み</div>
+            <div className="text-xs text-gray-400 mt-0.5">回答済み</div>
           </div>
         </div>
 
@@ -48,14 +48,14 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
           <div className="flex flex-wrap gap-x-6 gap-y-1">
             {event.max_intensity !== null && (
               <div className="flex items-baseline gap-1.5 text-sm">
-                <span className="text-xs text-white/40">最大震度</span>
-                <span className="font-bold text-white">震度{formatIntensity(event.max_intensity)}</span>
+                <span className="text-xs text-gray-400">最大震度</span>
+                <span className="font-bold text-gray-900">震度{formatIntensity(event.max_intensity)}</span>
               </div>
             )}
             {event.epicenter !== null && (
               <div className="flex items-baseline gap-1.5 text-sm">
-                <span className="text-xs text-white/40">震源地</span>
-                <span className="font-semibold text-white">{event.epicenter}</span>
+                <span className="text-xs text-gray-400">震源地</span>
+                <span className="font-semibold text-gray-900">{event.epicenter}</span>
               </div>
             )}
           </div>
@@ -63,10 +63,10 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
 
         <div className="space-y-1.5">
           <div className="flex justify-between items-baseline">
-            <span className="text-[11px] text-white/40 font-medium">回答率</span>
-            <span className="text-[11px] text-white/60 font-semibold tabular-nums">{pct}%</span>
+            <span className="text-[11px] text-gray-400 font-medium">回答率</span>
+            <span className="text-[11px] text-gray-600 font-semibold tabular-nums">{pct}%</span>
           </div>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
