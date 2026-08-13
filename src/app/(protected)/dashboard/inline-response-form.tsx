@@ -70,74 +70,79 @@ export function InlineResponseForm({ event }: { event: Event }) {
   const isDrill = event.event_type === 'test'
 
   return (
-    <div className="space-y-3">
-      {/* イベントコンテキスト */}
-      <div className={cn(
-        'rounded-2xl border px-4 py-3 space-y-1',
-        isDrill ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200',
-      )}>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={cn(
-            'text-xs font-bold px-2.5 py-0.5 rounded-full',
-            isDrill ? 'bg-amber-400 text-amber-950' : 'bg-red-500 text-white',
-          )}>
+    <div>
+      {/* イベントヘッダー：フル幅の緊急バナー */}
+      <div className={cn('px-4 pt-6 pb-5', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-white font-bold text-sm">
             {isDrill ? '🟡 避難訓練' : '🔴 安否確認'}
           </span>
-          <span className="text-xs text-gray-500 tabular-nums">{formatDateTime(event.issued_at)}</span>
+          <span className="text-white/70 text-xs tabular-nums">{formatDateTime(event.issued_at)}</span>
         </div>
-        {event.max_intensity != null && (
-          <p className={cn('text-sm font-bold', isDrill ? 'text-amber-900' : 'text-red-900')}>
-            最大震度{formatIntensity(event.max_intensity)}
-            {event.epicenter ? `　${event.epicenter}` : ''}
+
+        {event.max_intensity != null ? (
+          <div>
+            <p className="text-white/80 text-xs font-semibold mb-0.5">最大震度</p>
+            <p className="text-white font-black leading-none tracking-tighter"
+               style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
+              {formatIntensity(event.max_intensity)}
+            </p>
+            {event.epicenter && (
+              <p className="text-white text-lg font-bold mt-2">{event.epicenter}</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-white text-xl font-bold leading-snug">
+            {event.comment ?? '安否確認を行ってください'}
           </p>
         )}
-        {event.comment && (
-          <p className="text-sm text-gray-700">{event.comment}</p>
-        )}
-        <p className="text-xs text-gray-500">発報者：{event.issuer ?? '自動'}</p>
+
+        <p className="text-white/60 text-xs mt-3">発報者：{event.issuer ?? '自動'}</p>
       </div>
 
       {/* 回答フォーム */}
-      <form action={formAction} className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 space-y-4">
-        <input type="hidden" name="event_id" value={event.event_id} />
+      <div className="bg-white px-4 py-5 space-y-4">
+        <form action={formAction} className="space-y-4">
+          <input type="hidden" name="event_id" value={event.event_id} />
 
-        <RadioGroup name="self_status"   legend="本人の状況" options={SELF_OPTIONS}   isDrill={isDrill} />
-        <RadioGroup name="family_status" legend="家族の状況" options={FAMILY_OPTIONS} isDrill={isDrill} />
-        <RadioGroup name="work_status"   legend="業務対応"   options={WORK_OPTIONS}   isDrill={isDrill} />
+          <RadioGroup name="self_status"   legend="本人の状況" options={SELF_OPTIONS}   isDrill={isDrill} />
+          <RadioGroup name="family_status" legend="家族の状況" options={FAMILY_OPTIONS} isDrill={isDrill} />
+          <RadioGroup name="work_status"   legend="業務対応"   options={WORK_OPTIONS}   isDrill={isDrill} />
 
-        <div>
-          <label htmlFor="inline-comment" className="block text-sm font-semibold text-gray-700 mb-1.5">
-            コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
-          </label>
-          <textarea
-            id="inline-comment"
-            name="comment"
-            rows={2}
-            maxLength={50}
-            placeholder="状況を補足するコメントがあれば"
-            className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-          />
-        </div>
+          <div>
+            <label htmlFor="inline-comment" className="block text-sm font-semibold text-gray-700 mb-1.5">
+              コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
+            </label>
+            <textarea
+              id="inline-comment"
+              name="comment"
+              rows={2}
+              maxLength={50}
+              placeholder="状況を補足するコメントがあれば"
+              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+            />
+          </div>
 
-        {state.error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-            {state.error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className={cn(
-            'w-full py-3 text-sm font-bold rounded-xl transition-colors disabled:opacity-50',
-            isDrill
-              ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
-              : 'bg-red-500 hover:bg-red-600 text-white',
+          {state.error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              {state.error}
+            </p>
           )}
-        >
-          {isPending ? '送信中…' : '安否を報告する'}
-        </button>
-      </form>
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className={cn(
+              'w-full py-3.5 text-sm font-bold rounded-xl transition-colors disabled:opacity-50',
+              isDrill
+                ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
+                : 'bg-red-500 hover:bg-red-600 text-white',
+            )}
+          >
+            {isPending ? '送信中…' : '安否を報告する'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import type { Event } from '@/types'
-import { formatDateTime, formatIntensity, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
+import { formatDateTime, formatIntensity, getDisplayEventType } from '@/lib/utils'
 
 type Props = {
   event: Event
@@ -9,74 +9,63 @@ type Props = {
 
 export function EventSummary({ event, answeredCount, totalCount }: Props) {
   const displayType = getDisplayEventType(event)
-  const { label, className } = DISPLAY_EVENT_TYPE_CONFIG[displayType]
   const isEarthquake = event.event_type === 'earthquake'
   const isDrill = displayType === 'test'
   const pct = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className={`h-1.5 w-full ${isDrill ? 'bg-amber-400' : 'bg-red-500'}`} />
-
-      <div className="p-5 space-y-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 space-y-1.5">
-            <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold shrink-0 ${className}`}>
-                {label}
-              </span>
-              <span className="text-xs text-gray-400 tabular-nums whitespace-nowrap">{formatDateTime(event.issued_at)}</span>
-            </div>
-            {event.comment && (
-              <p className="text-base font-bold text-gray-900 tracking-tight">{event.comment}</p>
-            )}
-            <p className="text-xs text-gray-400">
-              発報者：<span className="font-medium text-gray-600">{event.issuer ?? '自動'}</span>
-            </p>
+    <div className="bg-white border-y border-gray-100 overflow-hidden">
+      {/* 緊急バナー */}
+      <div className={`px-4 pt-4 pb-4 ${isDrill ? 'bg-amber-400' : 'bg-red-600'}`}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-white font-bold text-sm">
+              {isDrill ? '🟡 避難訓練' : '🔴 安否確認'}
+            </span>
+            <span className="text-white/70 text-xs tabular-nums whitespace-nowrap">{formatDateTime(event.issued_at)}</span>
           </div>
-
           <div className="text-right shrink-0">
-            <div className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 tracking-tight">
-              {answeredCount}
-              <span className="text-sm sm:text-base font-normal text-gray-400 ml-1">/ {totalCount}名</span>
-            </div>
-            <div className="text-xs text-gray-400 mt-0.5">回答済み</div>
+            <span className="text-white font-black text-2xl tabular-nums leading-none">{answeredCount}</span>
+            <span className="text-white/60 text-sm"> / {totalCount}名</span>
           </div>
         </div>
 
-        {isEarthquake && (event.max_intensity !== null || event.epicenter !== null) && (
-          <div className="flex flex-wrap gap-x-6 gap-y-1">
-            {event.max_intensity !== null && (
-              <div className="flex items-baseline gap-1.5 text-sm">
-                <span className="text-xs text-gray-400">最大震度</span>
-                <span className="font-bold text-gray-900">震度{formatIntensity(event.max_intensity)}</span>
-              </div>
-            )}
-            {event.epicenter !== null && (
-              <div className="flex items-baseline gap-1.5 text-sm">
-                <span className="text-xs text-gray-400">震源地</span>
-                <span className="font-semibold text-gray-900">{event.epicenter}</span>
-              </div>
+        {isEarthquake && event.max_intensity != null && (
+          <div className="mt-3">
+            <p className="text-white/80 text-xs font-semibold">最大震度</p>
+            <p className="text-white font-black leading-none tracking-tighter mt-0.5"
+               style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
+              {formatIntensity(event.max_intensity)}
+            </p>
+            {event.epicenter && (
+              <p className="text-white text-base font-bold mt-1">{event.epicenter}</p>
             )}
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-baseline">
-            <span className="text-[11px] text-gray-400 font-medium">回答率</span>
-            <span className="text-[11px] text-gray-600 font-semibold tabular-nums">{pct}%</span>
-          </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${pct}%`,
-                background: pct === 100
-                  ? 'linear-gradient(90deg, #10b981, #059669)'
-                  : 'linear-gradient(90deg, #34d399, #10b981)',
-              }}
-            />
-          </div>
+        {!isEarthquake && event.comment && (
+          <p className="text-white text-base font-bold mt-2 leading-snug">{event.comment}</p>
+        )}
+
+        <p className="text-white/60 text-xs mt-2">発報者：{event.issuer ?? '自動'}</p>
+      </div>
+
+      {/* 進捗バー */}
+      <div className="px-4 py-3 space-y-1.5">
+        <div className="flex justify-between items-baseline">
+          <span className="text-xs text-gray-500 font-medium">回答率</span>
+          <span className="text-xs text-gray-700 font-bold tabular-nums">{pct}%　{answeredCount} / {totalCount}名</span>
+        </div>
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${pct}%`,
+              background: pct === 100
+                ? 'linear-gradient(90deg, #10b981, #059669)'
+                : 'linear-gradient(90deg, #34d399, #10b981)',
+            }}
+          />
         </div>
       </div>
     </div>

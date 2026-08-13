@@ -12,7 +12,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-lg mx-auto px-4 py-6">{children}</main>
+      <main className="max-w-lg mx-auto pb-10">{children}</main>
     </div>
   )
 }

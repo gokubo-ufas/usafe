@@ -63,25 +63,25 @@ export default async function EventDetailPage({
       new Date(a.latestResponse!.created_at).getTime()
     )
 
-  const bgClass = (event as Event).event_type === 'test' ? 'bg-amber-50' : 'bg-red-50'
-
   return (
-    <div className="space-y-4">
-      <div className={`fixed inset-0 -z-10 ${bgClass}`} />
-
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-      >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
-        </svg>
-        ホームへ
-      </Link>
+    <div className="space-y-px">
+      {/* 戻るリンク */}
+      <div className="px-4 pt-4 pb-2">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+          ホームへ
+        </Link>
+      </div>
 
       <EventSummary event={event as Event} answeredCount={answeredCount} totalCount={totalCount} />
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3 space-y-2.5">
+      {/* あなたの回答 */}
+      <div className="bg-white border-y border-gray-100 px-4 py-3 space-y-2.5">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-emerald-700 shrink-0">あなたの回答</h2>
           {myResponse?.self_status ? (
@@ -113,7 +113,10 @@ export default async function EventDetailPage({
         )}
       </div>
 
-      <StatusSection employees={employeesWithStatus} />
+      {/* ステータス一覧 */}
+      <div className="pt-4">
+        <StatusSection employees={employeesWithStatus} />
+      </div>
     </div>
   )
 }

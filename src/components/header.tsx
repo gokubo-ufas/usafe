@@ -22,7 +22,10 @@ export function Header() {
               </linearGradient>
             </defs>
           </svg>
-          <span className="text-white font-bold text-xl tracking-tight">U-Safe</span>
+          <div>
+            <span className="text-white font-bold text-xl tracking-tight leading-none">U-Safe</span>
+            <span className="block text-white/40 text-[10px] tracking-wide mt-0.5">安否確認ツール</span>
+          </div>
         </Link>
       </div>
     </header>

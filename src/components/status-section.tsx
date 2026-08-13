@@ -33,7 +33,6 @@ const SUMMARY_CONFIG = {
     fg: 'text-red-600',
     border: 'border-red-200',
     activeBorder: 'border-red-400',
-    bg: 'bg-red-50',
     activeBg: 'bg-red-50',
     accentBorder: 'border-l-red-400',
     headerBg: 'bg-red-50/60',
@@ -45,7 +44,6 @@ const SUMMARY_CONFIG = {
     fg: 'text-amber-600',
     border: 'border-amber-200',
     activeBorder: 'border-amber-400',
-    bg: 'bg-amber-50',
     activeBg: 'bg-amber-50',
     accentBorder: 'border-l-amber-400',
     headerBg: 'bg-amber-50/60',
@@ -57,7 +55,6 @@ const SUMMARY_CONFIG = {
     fg: 'text-gray-500',
     border: 'border-gray-200',
     activeBorder: 'border-gray-400',
-    bg: 'bg-gray-50',
     activeBg: 'bg-gray-50',
     accentBorder: 'border-l-gray-300',
     headerBg: 'bg-gray-50/60',
@@ -69,7 +66,6 @@ const SUMMARY_CONFIG = {
     fg: 'text-emerald-600',
     border: 'border-emerald-200',
     activeBorder: 'border-emerald-400',
-    bg: 'bg-emerald-50',
     activeBg: 'bg-emerald-50',
     accentBorder: 'border-l-emerald-400',
     headerBg: 'bg-emerald-50/60',
@@ -149,7 +145,8 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
     <div className="space-y-4">
       {middleSlot}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+      {/* サマリー：フル幅4分割 */}
+      <div className="grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 bg-white">
         {groups.map(({ key, summary, total }) => {
           const isActive = groupFilter === key
           return (
@@ -159,40 +156,41 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
               onClick={() => setGroupFilter(isActive ? '' : key)}
               disabled={total === 0}
               className={cn(
-                'rounded-xl border px-2 py-3 text-center transition-all duration-200 bg-white',
-                isActive
-                  ? cn('border-2', summary.activeBorder, summary.activeBg, 'scale-[1.03] shadow-md')
-                  : cn('border', summary.border, 'shadow-sm hover:shadow-md hover:scale-[1.01]'),
-                total === 0 && 'opacity-25 cursor-default pointer-events-none',
+                'py-3 text-center transition-colors',
+                isActive ? summary.activeBg : 'hover:bg-gray-50',
+                total === 0 && 'opacity-30 cursor-default pointer-events-none',
               )}
             >
               <div className={cn('text-[11px] font-bold leading-tight', summary.fg)}>{summary.label}</div>
-              <div className={cn('text-2xl font-bold tabular-nums tracking-tight mt-0.5', summary.fg)}>{total}</div>
-              <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">{summary.description}</div>
+              <div className={cn('text-2xl font-black tabular-nums tracking-tight mt-0.5', summary.fg)}>{total}</div>
             </button>
           )
         })}
       </div>
 
+      {/* 部署フィルター */}
       {departments.length > 1 && (
-        <select
-          value={dept}
-          onChange={(e) => setDept(e.target.value)}
-          className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent shadow-sm"
-        >
-          <option value="">全部署</option>
-          {departments.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
+        <div className="px-4">
+          <select
+            value={dept}
+            onChange={(e) => setDept(e.target.value)}
+            className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+          >
+            <option value="">全部署</option>
+            {departments.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+        </div>
       )}
 
+      {/* グループ一覧：フル幅 */}
       {visibleGroups.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-8">該当する社員がいません</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-px">
           {visibleGroups.map(({ key, config, summary, members }) => (
-            <div key={key} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div key={key} className="bg-white border-y border-gray-100 overflow-hidden">
               <div className={cn('flex items-center gap-2.5 px-4 py-2.5 border-l-4', summary.headerBg, summary.accentBorder)}>
                 <h3 className={cn('text-sm font-bold tracking-tight shrink-0', summary.fg)}>{config.label}</h3>
                 <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0', summary.badgeClass)}>{members.length}名</span>

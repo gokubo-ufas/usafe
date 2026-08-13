@@ -25,9 +25,9 @@ export default async function DashboardPage() {
 
   if (!latestEvent) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
-        <div className="text-4xl mb-4">✅</div>
-        <h2 className="text-base font-semibold text-gray-800 mb-1">現在イベントはありません</h2>
+      <div className="px-4 pt-8 text-center space-y-3">
+        <div className="text-4xl">✅</div>
+        <h2 className="text-base font-semibold text-gray-800">現在イベントはありません</h2>
         <p className="text-sm text-gray-400">安否確認が発報されると、ここに表示されます。</p>
       </div>
     )
@@ -87,22 +87,26 @@ export default async function DashboardPage() {
   const [latest, ...past] = events
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-2">
-        <SectionLabel>最新の発報</SectionLabel>
-        {latest && <EventCard event={latest} counts={countMap.get(latest.event_id)} />}
+    <div className="space-y-6 pt-4">
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-600 px-4 mb-2">最新の発報</h2>
+        <div className="divide-y divide-gray-100">
+          {latest && <EventCard event={latest} counts={countMap.get(latest.event_id)} />}
+        </div>
       </section>
 
       {past.length > 0 && (
-        <section className="space-y-2">
-          <SectionLabel muted>過去の発報</SectionLabel>
-          {past.map((event) => (
-            <EventCard key={event.event_id} event={event} counts={countMap.get(event.event_id)} />
-          ))}
+        <section>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 px-4 mb-2">過去の発報</h2>
+          <div className="divide-y divide-gray-100 border-y border-gray-100">
+            {past.map((event) => (
+              <EventCard key={event.event_id} event={event} counts={countMap.get(event.event_id)} />
+            ))}
+          </div>
         </section>
       )}
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3 px-4">
         <Link
           href="/dispatch"
           className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
@@ -122,17 +126,6 @@ export default async function DashboardPage() {
   )
 }
 
-function SectionLabel({ children, muted }: { children: React.ReactNode; muted?: boolean }) {
-  return (
-    <h2 className={cn(
-      'text-xs font-bold uppercase tracking-widest px-1',
-      muted ? 'text-gray-400' : 'text-emerald-600',
-    )}>
-      {children}
-    </h2>
-  )
-}
-
 type CardEvent = Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id' | 'max_intensity' | 'epicenter'>
 
 function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }) {
@@ -144,10 +137,12 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
   return (
     <Link
       href={`/events/${event.event_id}`}
-      className="block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="block bg-white hover:bg-gray-50 transition-colors"
     >
-      <div className={cn('h-1 w-full', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
-      <div className="px-4 py-3 flex items-center gap-3">
+      <div className="flex items-center gap-3 px-4 py-3.5">
+        {/* 左アクセントライン */}
+        <div className={cn('w-1 h-12 rounded-full shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
+
         <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={cn(
@@ -159,17 +154,18 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
             <span className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
           </div>
           {event.max_intensity != null && (
-            <p className="text-xs text-gray-600">
-              震度{formatIntensity(event.max_intensity)}{event.epicenter ? `　${event.epicenter}` : ''}
+            <p className="text-sm font-bold text-gray-800">
+              震度{formatIntensity(event.max_intensity)}
+              {event.epicenter && <span className="font-normal text-gray-500 ml-2">{event.epicenter}</span>}
             </p>
           )}
           {!event.max_intensity && event.comment && (
-            <p className="text-xs text-gray-500 truncate">{event.comment}</p>
+            <p className="text-sm text-gray-600 truncate">{event.comment}</p>
           )}
         </div>
 
         <div className="text-right shrink-0 space-y-1">
-          <p className="text-sm font-bold text-gray-900 tabular-nums">
+          <p className="text-base font-bold text-gray-900 tabular-nums">
             {answered}<span className="text-xs font-normal text-gray-400"> / {total}名</span>
           </p>
           <div className="flex items-center gap-1 justify-end flex-wrap">
