@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
 import { EventSummary } from '@/components/event-summary'
-import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup, STATUS_GROUP_CONFIG } from '@/lib/utils'
+import { formatDateTimeFull, formatIntensity, getDisplayEventType, getStatusGroup, STATUS_GROUP_CONFIG } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
 
@@ -167,8 +167,7 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
               <span className={cn('text-[10px] font-bold px-1.5 py-0.5 shrink-0', isDrill ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}>
                 {isDrill ? '訓練' : '本番'}
               </span>
-              <span className="text-[11px] text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
-              <span className="text-[11px] text-gray-400 truncate">発報：{event.issuer ?? '自動発報'}</span>
+              <span className="text-[11px] text-gray-400 tabular-nums truncate">{formatDateTimeFull(event.issued_at)} 発報（{event.issuer ?? '自動発報'}）</span>
             </div>
             <span className="text-sm font-bold text-gray-700 tabular-nums shrink-0">{answered}<span className="text-xs font-normal text-gray-400"> / {total}名</span></span>
           </div>
