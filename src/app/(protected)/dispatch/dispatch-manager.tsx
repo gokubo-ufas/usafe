@@ -80,6 +80,7 @@ export function DispatchManager({
     setModal(null)
     const fd = new FormData()
     fd.set('comment', comment)
+    fd.set('employee_numbers', JSON.stringify([...checked]))
     if (modal === 'drill') drillAction(fd)
     else                   prodAction(fd)
   }
@@ -243,7 +244,7 @@ export function DispatchManager({
       {modal && (
         <DispatchModal
           mode={modal}
-          employeeCount={activeEmployees.length}
+          employeeCount={checked.size}
           isPending={isPending}
           error={activeState.error}
           onClose={() => setModal(null)}
@@ -286,7 +287,7 @@ function DispatchModal({
 
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
           <p className="text-sm text-gray-600">
-            在籍中の社員 <span className="font-bold text-gray-900">{employeeCount}名</span> 全員に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
+            選択した <span className="font-bold text-gray-900">{employeeCount}名</span> に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
           </p>
 
           <div>
@@ -322,8 +323,8 @@ function DispatchModal({
         isOpen={showConfirm}
         title={isDrill ? '避難訓練の確認' : '本番発報の確認'}
         message={isDrill
-          ? `全社員（${employeeCount}名）に避難訓練の安否確認を発報します。\nよろしいですか？`
-          : `全社員（${employeeCount}名）に安否確認を発報します。\nこの操作は取り消せません。よろしいですか？`}
+          ? `選択した${employeeCount}名に避難訓練の安否確認を発報します。\nよろしいですか？`
+          : `選択した${employeeCount}名に安否確認を発報します。\nこの操作は取り消せません。よろしいですか？`}
         confirmLabel="発報する"
         onCancel={() => setShowConfirm(false)}
         onConfirm={() => { setShowConfirm(false); onConfirm(comment) }}

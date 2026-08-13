@@ -60,6 +60,16 @@ export async function fetchAndSyncFromGAS(): Promise<SyncResult> {
   return { ok: true, received: data.received, active: data.active }
 }
 
+function parseEmployeeNumbers(raw: string | null): string[] | null {
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 export async function dispatchDrill(_prev: State, formData: FormData): Promise<State> {
   const employee = await getCurrentEmployee()
   if (!employee) redirect('/login')
@@ -69,11 +79,14 @@ export async function dispatchDrill(_prev: State, formData: FormData): Promise<S
     return { error: 'コメントは50文字以内で入力してください' }
   }
 
+  const employeeNumbers = parseEmployeeNumbers(formData.get('employee_numbers') as string)
+
   const admin = createAdminClient()
   const { error } = await admin.rpc('dispatch_alert', {
     p_event_type: 'test',
     p_issuer: employee.name,
     p_comment: comment,
+    p_employee_numbers: employeeNumbers,
   })
 
   if (error) {
@@ -102,11 +115,14 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
     return { error: 'コメントは50文字以内で入力してください' }
   }
 
+  const employeeNumbers = parseEmployeeNumbers(formData.get('employee_numbers') as string)
+
   const admin = createAdminClient()
   const { error } = await admin.rpc('dispatch_alert', {
     p_event_type: 'earthquake',
     p_issuer: employee.name,
     p_comment: comment,
+    p_employee_numbers: employeeNumbers,
   })
 
   if (error) {
