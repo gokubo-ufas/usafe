@@ -97,13 +97,13 @@ export function DispatchManager({
   const successState = drillState.success ? drillState : prodState.success ? prodState : null
   if (successState?.success) {
     return (
-      <div className="px-4 pt-8 space-y-4">
+      <div className="px-4 pt-10 space-y-4">
         <div className={cn(
           'border p-5 space-y-4',
-          successState.slackFailed ? 'bg-amber-50 border-amber-300' : 'bg-emerald-50 border-emerald-300',
+          successState.slackFailed ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200',
         )}>
           <div className="flex items-start gap-3">
-            <span className="text-2xl">{successState.slackFailed ? '⚠️' : '✅'}</span>
+            <span className="text-xl mt-0.5">{successState.slackFailed ? '⚠️' : '✅'}</span>
             <p className={cn('text-sm font-medium leading-relaxed', successState.slackFailed ? 'text-amber-800' : 'text-emerald-800')}>
               {successState.success}
             </p>
@@ -126,56 +126,70 @@ export function DispatchManager({
     : null
 
   return (
-    <div>
+    <div className="pb-8">
+
       {/* 1. 社員情報取得 */}
-      <div className="px-4 pt-4 pb-3 space-y-1.5">
+      <div className="px-4 pt-5 pb-4">
         <button
           type="button"
           onClick={fetchAndSync}
           disabled={syncPending}
-          className="w-full flex items-center justify-between px-4 py-3 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-40"
+          className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40"
         >
-          <span className="text-sm font-semibold text-emerald-700">
-            {syncPending ? '取得中…' : '社員情報を取得・最新化'}
+          <span className="text-sm font-medium text-gray-600">
+            {syncPending ? '取得中…' : '社員情報をスプレッドシートから更新'}
           </span>
-          <span className="text-[11px] text-emerald-500 shrink-0 ml-3">
+          <span className="text-[11px] text-gray-400 shrink-0 ml-3 tabular-nums">
             {lastSyncLabel ? `最終 ${lastSyncLabel}` : '未取得'}
           </span>
         </button>
         {syncResult?.ok && (
-          <p className="text-xs text-center text-emerald-600">最新化が完了しました。</p>
+          <p className="text-xs text-emerald-600 mt-1.5 text-center">更新が完了しました。</p>
         )}
         {syncResult && !syncResult.ok && (
-          <div className="border border-amber-200 bg-amber-50 px-4 py-3 space-y-0.5">
+          <div className="mt-1.5 border border-amber-200 bg-amber-50 px-4 py-3">
             <p className="text-xs font-semibold text-amber-800">スプレッドシートとの同期に失敗しました</p>
-            <p className="text-xs text-amber-700">現在のデータで発報できますが、内容を確認してから発報してください。</p>
+            <p className="text-xs text-amber-700 mt-0.5">現在のデータで発報できますが、内容を確認してから発報してください。</p>
           </div>
         )}
       </div>
 
       {/* 2. 対象者一覧 */}
-      <div className="flex items-center justify-between px-4 py-2 border-t border-b border-gray-100 bg-white">
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={allActiveChecked}
-            onChange={toggleAll}
-            className="w-4 h-4 accent-emerald-600 cursor-pointer"
-          />
-          <span className="text-xs font-bold text-gray-500">
-            部署
-          </span>
+      {/* テーブルヘッダー */}
+      <div className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-2 border-t border-b border-gray-100 bg-gray-50">
+        <input
+          type="checkbox"
+          checked={allActiveChecked}
+          onChange={toggleAll}
+          className="w-4 h-4 accent-emerald-600 cursor-pointer"
+        />
+        <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">部署</span>
+        <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">氏名</span>
+        <div className="flex items-center justify-between col-span-1">
+          <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">状態</span>
         </div>
-        <span className="text-xs text-gray-400 tabular-nums">
-          {checked.size} / {activeEmployees.length}名 選択中
-        </span>
       </div>
 
-      <div className="bg-white divide-y divide-gray-100 border-b border-gray-100">
-        {employees.map(emp => emp.is_active ? (
+      {/* 選択カウント */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-white">
+        <span className="text-xs text-gray-400">
+          <span className="font-bold text-gray-700 tabular-nums">{checked.size}名</span>を選択中
+        </span>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          {allActiveChecked ? '全選択を解除' : '全員を選択'}
+        </button>
+      </div>
+
+      {/* 在籍中 */}
+      <div className="bg-white divide-y divide-gray-100">
+        {activeEmployees.map(emp => (
           <label
             key={emp.employee_number}
-            className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
           >
             <input
               type="checkbox"
@@ -183,34 +197,42 @@ export function DispatchManager({
               onChange={() => toggleOne(emp.employee_number)}
               className="w-4 h-4 accent-emerald-600 shrink-0"
             />
-            <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{emp.department ?? '—'}</span>
+            <span className="text-xs text-gray-500 truncate">{emp.department ?? '—'}</span>
             <span className="text-sm font-medium text-gray-800 truncate">{emp.name}</span>
+            <span className="text-[10px] font-semibold text-emerald-600 text-center">在籍中</span>
           </label>
-        ) : (
-          <div
-            key={emp.employee_number}
-            className="flex items-center gap-3 px-4 py-2.5 opacity-30"
-          >
-            <span className="w-4 h-4 shrink-0" />
-            <span className="text-xs text-gray-400 w-24 shrink-0 truncate">{emp.department ?? '—'}</span>
-            <span className="text-sm text-gray-400 line-through truncate">{emp.name}</span>
-          </div>
         ))}
       </div>
 
+      {/* 退職済 */}
       {retiredEmployees.length > 0 && (
-        <p className="text-[10px] text-gray-400 text-center py-2">
-          退職済み {retiredEmployees.length}名は発報対象外
-        </p>
+        <>
+          <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+            <span className="text-[10px] font-semibold text-gray-300 tracking-wide uppercase">退職済み（発報対象外）</span>
+          </div>
+          <div className="bg-white divide-y divide-gray-100">
+            {retiredEmployees.map(emp => (
+              <div
+                key={emp.employee_number}
+                className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-3 opacity-35"
+              >
+                <span className="w-4 h-4" />
+                <span className="text-xs text-gray-400 truncate">{emp.department ?? '—'}</span>
+                <span className="text-sm text-gray-400 line-through truncate">{emp.name}</span>
+                <span className="text-[10px] font-semibold text-gray-400 text-center">退職済</span>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* 3. 発報ボタン */}
-      <div className="grid grid-cols-2 gap-px bg-gray-200 border-t border-gray-200 mt-4">
+      <div className="grid grid-cols-2 gap-3 px-4 pt-6">
         <button
           type="button"
           onClick={() => setModal('drill')}
           disabled={checked.size === 0}
-          className="flex items-center justify-center gap-2 py-5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-amber-950 transition-colors disabled:opacity-40"
+          className="py-4 text-sm font-bold border-2 border-amber-300 text-amber-700 bg-white hover:bg-amber-50 transition-colors disabled:opacity-40"
         >
           訓練発報
         </button>
@@ -218,7 +240,7 @@ export function DispatchManager({
           type="button"
           onClick={() => setModal('production')}
           disabled={checked.size === 0}
-          className="flex items-center justify-center gap-2 py-5 text-sm font-bold bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-40"
+          className="py-4 text-sm font-bold bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
         >
           本番発報
         </button>
@@ -278,9 +300,10 @@ function DispatchModal({
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >
         <div className="bg-white shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
+          {/* モーダルヘッダー */}
           <div className={cn(
-            'px-5 pt-4 pb-3 border-b border-white/20 shrink-0',
-            isDrill ? 'bg-amber-400' : 'bg-red-500',
+            'px-5 pt-4 pb-3 shrink-0 border-b',
+            isDrill ? 'bg-amber-400 border-amber-500' : 'bg-gray-900 border-gray-800',
           )}>
             <div className="flex items-center justify-between">
               <h2 className={cn('text-base font-bold', isDrill ? 'text-amber-950' : 'text-white')}>
@@ -289,60 +312,54 @@ function DispatchModal({
               <button
                 type="button"
                 onClick={onClose}
-                className={cn('w-8 h-8 flex items-center justify-center', isDrill ? 'text-amber-800 hover:text-amber-950' : 'text-white/70 hover:text-white')}
+                className={cn('w-8 h-8 flex items-center justify-center', isDrill ? 'text-amber-800 hover:text-amber-950' : 'text-white/50 hover:text-white')}
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p className={cn('text-xs mt-0.5', isDrill ? 'text-amber-800' : 'text-white/70')}>
+            <p className={cn('text-xs mt-0.5', isDrill ? 'text-amber-800' : 'text-gray-400')}>
               {employeeCount}名に安否確認を送信します
             </p>
           </div>
 
-          <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+          <div className="overflow-y-auto flex-1 px-5 py-5 space-y-4">
             {!isDrill && (
-              <p className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-2">
-                🚨 これは訓練ではありません
+              <p className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 px-3 py-2">
+                ⚠️ これは訓練ではありません
               </p>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                最大震度 <span className="font-normal text-gray-400 text-xs">任意</span>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                最大震度 <span className="font-normal normal-case text-gray-400">（任意）</span>
               </label>
               <select
                 value={intensity}
                 onChange={(e) => setIntensity(e.target.value)}
-                className={cn(
-                  'w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent',
-                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
-                )}
+                className="w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               >
                 {INTENSITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                震源地 <span className="font-normal text-gray-400 text-xs">任意</span>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                震源地 <span className="font-normal normal-case text-gray-400">（任意）</span>
               </label>
               <input
                 type="text"
                 value={epicenter}
                 onChange={(e) => setEpicenter(e.target.value)}
                 placeholder="例：神奈川県西部"
-                className={cn(
-                  'w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent',
-                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
-                )}
+                className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                特記事項 <span className="font-normal text-gray-400 text-xs">任意・50文字以内</span>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                特記事項 <span className="font-normal normal-case text-gray-400">（任意・50文字以内）</span>
               </label>
               <textarea
                 rows={2}
@@ -350,20 +367,17 @@ function DispatchModal({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder={isDrill ? '訓練の目的・注意事項' : '緊急対応指示など'}
-                className={cn(
-                  'w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none',
-                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
-                )}
+                className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent resize-none"
               />
             </div>
 
             {!isDrill && (
-              <label className="flex items-start gap-3 cursor-pointer select-none">
+              <label className="flex items-start gap-3 cursor-pointer select-none p-3 bg-gray-50 border border-gray-200">
                 <input
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-red-600 shrink-0"
+                  className="mt-0.5 w-4 h-4 accent-gray-700 shrink-0"
                 />
                 <span className="text-xs text-gray-600 leading-snug">
                   ダッシュボードで自動発報されていないことを確認しました。本番発報に同意します。
@@ -380,7 +394,7 @@ function DispatchModal({
                 type="button"
                 onClick={onClose}
                 disabled={isPending}
-                className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                className="flex-1 py-3 text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 キャンセル
               </button>
@@ -389,10 +403,10 @@ function DispatchModal({
                 onClick={() => setShowConfirm(true)}
                 disabled={isPending || !canSubmit}
                 className={cn(
-                  'flex-1 py-2.5 text-sm font-bold disabled:opacity-40 transition-colors',
+                  'flex-1 py-3 text-sm font-bold disabled:opacity-40 transition-colors',
                   isDrill
-                    ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
-                    : 'bg-red-500 hover:bg-red-600 text-white',
+                    ? 'border-2 border-amber-300 text-amber-700 bg-white hover:bg-amber-50'
+                    : 'bg-gray-900 text-white hover:bg-gray-800',
                 )}
               >
                 {isPending ? '発報中…' : '発報する'}

@@ -100,7 +100,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {latest && (
         <section>
-          <h2 className="text-base font-bold text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
+          <h2 className="text-base font-bold text-gray-600 px-4 pt-4 pb-2">最新の発報</h2>
           <Link href={`/events/${latest.event_id}`} className="block group">
             <EventSummary
               event={latest as Event}
