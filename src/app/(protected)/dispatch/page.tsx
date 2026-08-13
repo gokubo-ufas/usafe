@@ -6,20 +6,23 @@ export default async function DispatchPage() {
   const { data } = await admin
     .from('employees')
     .select('employee_number, name, department, is_active, updated_at')
-    .order('employee_number')
-    .order('department', { nullsFirst: false })
     .order('is_active', { ascending: false })
+    .order('department', { nullsFirst: false })
+    .order('employee_number')
 
   const employees = (data ?? []).sort((a, b) => {
-    const numA = Number(a.employee_number)
-    const numB = Number(b.employee_number)
-    const byNum = !isNaN(numA) && !isNaN(numB)
-      ? numA - numB
-      : a.employee_number.localeCompare(b.employee_number, 'ja')
-    if (byNum !== 0) return byNum
+    // 1. 在籍状況（在籍中が先）
+    const byActive = (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0)
+    if (byActive !== 0) return byActive
+    // 2. 部署名（日本語ロケール順、null は後ろ）
     const byDept = (a.department ?? '').localeCompare(b.department ?? '', 'ja')
     if (byDept !== 0) return byDept
-    return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0)
+    // 3. 社員番号（数値変換できる場合は数値順）
+    const numA = Number(a.employee_number)
+    const numB = Number(b.employee_number)
+    return !isNaN(numA) && !isNaN(numB)
+      ? numA - numB
+      : a.employee_number.localeCompare(b.employee_number, 'ja')
   })
 
   const lastUpdatedAt = employees.length > 0
