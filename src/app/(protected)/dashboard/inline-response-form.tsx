@@ -44,25 +44,20 @@ function RadioGroup({
       <legend className="text-sm font-semibold text-gray-800 mb-1.5">
         {legend}<span className="text-red-500 ml-1">*</span>
       </legend>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="flex rounded-xl overflow-hidden border border-gray-200 divide-x divide-gray-200">
         {options.map(({ value, label }) => (
           <label
             key={value}
             className={cn(
-              'flex items-center gap-2 cursor-pointer rounded-lg border-2 border-gray-200 px-2.5 py-1.5 transition-colors',
+              'flex-1 flex items-center justify-center text-center py-2.5 px-1 text-[11px] font-medium cursor-pointer leading-snug transition-colors',
+              'text-gray-500 bg-white hover:bg-gray-50',
               isDrill
-                ? 'hover:border-amber-400 hover:bg-amber-50/40 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50'
-                : 'hover:border-red-300 hover:bg-red-50/40 has-[:checked]:border-red-500 has-[:checked]:bg-red-50',
+                ? 'has-[:checked]:bg-amber-400 has-[:checked]:text-amber-950 has-[:checked]:font-bold'
+                : 'has-[:checked]:bg-red-500 has-[:checked]:text-white has-[:checked]:font-bold',
             )}
           >
-            <input
-              type="radio"
-              name={name}
-              value={value}
-              required
-              className={cn('w-3.5 h-3.5 shrink-0', isDrill ? 'accent-amber-600' : 'accent-red-600')}
-            />
-            <span className="text-xs font-medium text-gray-900 leading-tight">{label}</span>
+            <input type="radio" name={name} value={value} required className="sr-only" />
+            {label}
           </label>
         ))}
       </div>

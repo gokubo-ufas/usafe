@@ -42,11 +42,11 @@ function RadioGroup({
       <legend className="text-sm font-semibold text-gray-700 mb-1.5">
         {legend}<span className="text-red-500 ml-1">*</span>
       </legend>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="flex rounded-xl overflow-hidden border border-gray-200 divide-x divide-gray-200">
         {options.map(({ value, label }) => (
           <label
             key={value}
-            className="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-gray-200 px-2.5 py-1.5 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
+            className="flex-1 flex items-center justify-center text-center py-2.5 px-1 text-[11px] font-medium cursor-pointer leading-snug transition-colors text-gray-500 bg-white hover:bg-gray-50 has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:font-bold"
           >
             <input
               type="radio"
@@ -54,9 +54,9 @@ function RadioGroup({
               value={value}
               required
               defaultChecked={defaultValue === value}
-              className="w-3.5 h-3.5 accent-emerald-700 shrink-0"
+              className="sr-only"
             />
-            <span className="text-xs font-medium text-gray-900 leading-tight">{label}</span>
+            {label}
           </label>
         ))}
       </div>
