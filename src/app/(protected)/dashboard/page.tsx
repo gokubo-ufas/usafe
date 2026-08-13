@@ -190,7 +190,7 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
           </p>
 
           {/* ステータス（静かなテキスト表示） */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3">
             {STATUS_ITEMS.map(({ key, label }) => (
               <span key={key} className="text-[10px] tabular-nums">
                 <span className={STATUS_GROUP_CONFIG[key].textColor + ' font-bold'}>{counts?.[key] ?? 0}</span>
