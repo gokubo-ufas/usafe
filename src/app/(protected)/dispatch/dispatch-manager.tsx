@@ -121,7 +121,7 @@ export function DispatchManager({
 
   const lastSyncLabel = lastUpdatedAt
     ? new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-        timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+        timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
       })
     : null
 
@@ -155,6 +155,20 @@ export function DispatchManager({
       </div>
 
       {/* 2. 対象者一覧 */}
+      {/* 選択カウント・全選択トグル */}
+      <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100 bg-white">
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          {allActiveChecked ? '全選択を解除' : '全員を選択'}
+        </button>
+        <span className="text-xs text-gray-400">
+          <span className="font-bold text-gray-700 tabular-nums">{checked.size}名</span>を選択中
+        </span>
+      </div>
+
       {/* テーブルヘッダー */}
       <div className="grid grid-cols-[1.25rem_1fr_1fr_3.5rem] gap-x-3 items-center px-4 py-2 border-t border-b border-gray-100 bg-gray-50">
         <input
@@ -165,23 +179,7 @@ export function DispatchManager({
         />
         <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">部署</span>
         <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">氏名</span>
-        <div className="flex items-center justify-between col-span-1">
-          <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">状態</span>
-        </div>
-      </div>
-
-      {/* 選択カウント */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-white">
-        <span className="text-xs text-gray-400">
-          <span className="font-bold text-gray-700 tabular-nums">{checked.size}名</span>を選択中
-        </span>
-        <button
-          type="button"
-          onClick={toggleAll}
-          className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          {allActiveChecked ? '全選択を解除' : '全員を選択'}
-        </button>
+        <span className="text-[10px] font-semibold text-gray-400 tracking-wide uppercase">状態</span>
       </div>
 
       {/* 在籍中 */}
