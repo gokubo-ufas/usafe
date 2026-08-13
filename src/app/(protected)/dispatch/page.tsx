@@ -8,6 +8,7 @@ export default async function DispatchPage() {
     .select('employee_number, name, department, is_active, updated_at')
     .order('employee_number')
     .order('department', { nullsFirst: false })
+    .order('is_active', { ascending: false })
 
   const employees = data ?? []
 

@@ -188,9 +188,9 @@ export function DispatchManager({
           <span>氏名</span>
         </div>
 
-        {/* 全社員（在籍中→退職済の順） */}
+        {/* 全社員 */}
         <div className="divide-y divide-gray-100/80">
-          {activeEmployees.map(emp => (
+          {employees.map(emp => emp.is_active ? (
             <label
               key={emp.employee_number}
               className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
@@ -212,14 +212,13 @@ export function DispatchManager({
               <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
               <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
             </label>
-          ))}
-          {retiredEmployees.map(emp => (
+          ) : (
             <div
               key={emp.employee_number}
-              className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs"
+              className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs bg-gray-50"
             >
               <div className="flex items-center pr-3">
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold leading-none">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">
                   ✕
                 </span>
               </div>
