@@ -46,7 +46,7 @@ function RadioGroup({
         {options.map(({ value, label }) => (
           <label
             key={value}
-            className="flex items-center gap-3 cursor-pointer rounded-xl border-2 border-gray-200 px-4 py-3 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
+            className="flex items-center gap-3 cursor-pointer rounded-xl border-2 border-gray-200 px-3 py-2.5 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
           >
             <input
               type="radio"
@@ -86,9 +86,9 @@ function ModalForm({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm max-h-[92vh] flex flex-col">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs max-h-[92vh] flex flex-col">
         {/* ヘッダー */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
           <h2 className="text-base font-bold text-gray-900">安否報告</h2>
           <button
             type="button"
@@ -103,7 +103,7 @@ function ModalForm({
         </div>
 
         {/* フォーム本体 */}
-        <form action={formAction} className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+        <form action={formAction} className="overflow-y-auto flex-1 px-5 py-4 space-y-5">
           <input type="hidden" name="event_id" value={eventId} />
 
           <RadioGroup
@@ -151,14 +151,14 @@ function ModalForm({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
+              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
             >
               キャンセル
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 py-3 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors"
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors"
             >
               {isPending ? '送信中…' : '送信する'}
             </button>

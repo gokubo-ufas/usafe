@@ -275,46 +275,48 @@ function DispatchModal({
   const canSubmit = isDrill || agreed
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm max-h-[92vh] flex flex-col">
+    <>
+      <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+        <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
 
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
-          <h2 className="text-base font-bold text-gray-900">{isDrill ? '🟡 避難訓練発報' : '🔴 本番発報'}</h2>
-          <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
-
-        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
-          <p className="text-sm text-gray-600">
-            選択した <span className="font-bold text-gray-900">{employeeCount}名</span> に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
-          </p>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
-            </label>
-            <textarea
-              rows={3} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
-              placeholder={isDrill ? '訓練の目的や注意事項を入力してください' : '緊急事態の状況や対応指示を入力してください'}
-              className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
-            />
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
+            <h2 className="text-base font-bold text-gray-900">{isDrill ? '🟡 避難訓練発報' : '🔴 本番発報'}</h2>
+            <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
           </div>
 
-          {!isDrill && (
-            <label className="flex items-start gap-3 cursor-pointer select-none">
-              <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-red-600 shrink-0" />
-              <span className="text-sm text-gray-700 leading-snug">ホームと履歴で自動発報がされていないことを確認しました。本番発報することに同意します。</span>
-            </label>
-          )}
+          <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+            <p className="text-sm text-gray-600">
+              選択した <span className="font-bold text-gray-900">{employeeCount}名</span> に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
+            </p>
 
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
+              </label>
+              <textarea
+                rows={3} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
+                placeholder={isDrill ? '訓練の目的や注意事項を入力してください' : '緊急事態の状況や対応指示を入力してください'}
+                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+              />
+            </div>
 
-          <div className="flex gap-3 pb-1">
-            <button type="button" onClick={onClose} disabled={isPending} className="flex-1 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50">キャンセル</button>
-            <button type="button" onClick={() => setShowConfirm(true)} disabled={isPending || !canSubmit} className={cn('flex-1 py-3 text-sm font-semibold rounded-xl disabled:opacity-40 transition-colors', isDrill ? 'bg-amber-400 hover:bg-amber-500 text-amber-900' : 'bg-red-600 hover:bg-red-700 text-white')}>
-              {isPending ? '発報中…' : '発報する'}
-            </button>
+            {!isDrill && (
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-red-600 shrink-0" />
+                <span className="text-sm text-gray-700 leading-snug">ホームと履歴で自動発報がされていないことを確認しました。本番発報することに同意します。</span>
+              </label>
+            )}
+
+            {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">{error}</p>}
+
+            <div className="flex gap-3 pb-1">
+              <button type="button" onClick={onClose} disabled={isPending} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50">キャンセル</button>
+              <button type="button" onClick={() => setShowConfirm(true)} disabled={isPending || !canSubmit} className={cn('flex-1 py-2.5 text-sm font-semibold rounded-xl disabled:opacity-40 transition-colors', isDrill ? 'bg-amber-400 hover:bg-amber-500 text-amber-900' : 'bg-red-600 hover:bg-red-700 text-white')}>
+                {isPending ? '発報中…' : '発報する'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -332,6 +334,6 @@ function DispatchModal({
         danger={!isDrill}
         warning={isDrill}
       />
-    </div>
+    </>
   )
 }

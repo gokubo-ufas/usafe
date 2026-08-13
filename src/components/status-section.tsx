@@ -104,15 +104,15 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
           <div key={emp.employee_number} className="px-4 py-2.5 space-y-1">
 
             {/* 行1：氏名 + 最終更新日時 */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-base font-semibold text-gray-800 truncate">{emp.name}</span>
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <span className="text-sm font-semibold text-gray-800 truncate min-w-0">{emp.name}</span>
               <span className="text-[10px] text-gray-300 whitespace-nowrap tabular-nums shrink-0">
                 {answered && r ? formatAnsweredAt(r.created_at) : ''}
               </span>
             </div>
 
             {/* 行2：本人・家族・業務 等分3列（全行揃え） */}
-            <div className="grid grid-cols-3 text-xs">
+            <div className="grid grid-cols-3 gap-x-1 text-[11px]">
               <span>
                 <span className="text-gray-400">本人：</span>
                 <span className="font-semibold text-gray-700">{selfVal}</span>

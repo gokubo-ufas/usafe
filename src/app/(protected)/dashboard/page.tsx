@@ -90,16 +90,16 @@ export default async function DashboardPage() {
             employees={employeesWithStatus}
             middleSlot={
               <div className="bg-white rounded-2xl shadow-sm px-5 py-3 space-y-2 border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-emerald-700">あなたの回答状況</h2>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold text-emerald-700 shrink-0">あなたの回答</h2>
                   {myResponse?.self_status ? (
-                    <span className="text-xs font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shadow-sm">
+                    <span className="text-xs font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shadow-sm whitespace-nowrap">
                       ✓ 回答済み
                     </span>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-red-600 animate-pulse">直ちに安否を報告してください！</span>
-                      <span className="text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full shadow-sm animate-pulse">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs font-bold text-red-600 animate-pulse whitespace-nowrap">急いでください！</span>
+                      <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 rounded-full shadow-sm animate-pulse whitespace-nowrap">
                         未回答
                       </span>
                     </div>
