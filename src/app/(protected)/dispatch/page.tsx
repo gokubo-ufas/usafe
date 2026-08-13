@@ -15,6 +15,8 @@ export default async function DispatchPage() {
     const byActive = (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0)
     if (byActive !== 0) return byActive
     // 2. 部署名（日本語ロケール順、null は後ろ）
+    if (a.department === null && b.department !== null) return 1
+    if (a.department !== null && b.department === null) return -1
     const byDept = (a.department ?? '').localeCompare(b.department ?? '', 'ja')
     if (byDept !== 0) return byDept
     // 3. 社員番号（数値変換できる場合は数値順）

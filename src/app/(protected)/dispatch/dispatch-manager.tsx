@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
+import { useActionState, useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ConfirmModal } from '@/components/confirm-modal'
 import { dispatchDrill, dispatchProduction, applySyncFromGAS } from './actions'
@@ -40,6 +41,8 @@ export function DispatchManager({
   const isPending   = modal === 'drill' ? drillPending : prodPending
   const activeState = modal === 'drill' ? drillState   : prodState
 
+  const router = useRouter()
+
   const [preview,     setPreview]    = useState<PreviewResult | null>(null)
   const [gasPending,  startGasFetch] = useTransition()
   const [syncPending, startSync]     = useTransition()
@@ -68,6 +71,11 @@ export function DispatchManager({
     else                   prodAction(fd)
   }
 
+  useEffect(() => {
+    fetchGasPreview()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function fetchGasPreview() {
     startGasFetch(async () => {
       setSyncResult(null)
@@ -81,8 +89,14 @@ export function DispatchManager({
     if (!preview || !preview.ok) return
     startSync(async () => {
       const result = await applySyncFromGAS(preview.incoming)
-      setSyncResult(result)
-      if (result.ok) setPreview(null)
+      if (result.ok) {
+        setPreview(null)
+        setSyncResult(null)
+        router.refresh()
+        fetchGasPreview()
+      } else {
+        setSyncResult(result)
+      }
     })
   }
 
@@ -129,11 +143,75 @@ export function DispatchManager({
           </button>
       </div>
 
+      {/* ── 社員情報取得 ── */}
+      <div className="space-y-2">
+      <h2 className="text-base font-bold text-gray-900">社員情報取得</h2>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
+          <span>
+            {lastUpdatedAt
+              ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+              : '未取得'}
+          </span>
+          <span>在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名</span>
+        </div>
+        {/* 照合ステータス行 */}
+        {(gasPending || preview === null) ? (
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 px-0.5">
+            <svg className="animate-spin w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/></svg>
+            スプレッドシートと照合中…
+          </div>
+        ) : preview.ok ? (
+          preview.diff.length === 0 ? (
+            <div className="flex items-center gap-1.5 text-xs text-emerald-600 px-0.5">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd"/></svg>
+              スプレッドシートと一致しています
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd"/></svg>
+                  {preview.diff.length}件の変更があります
+                </div>
+                <button
+                  type="button"
+                  onClick={applySync}
+                  disabled={syncPending}
+                  className="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  {syncPending ? '取得中…' : '取得して最新化'}
+                </button>
+              </div>
+              {syncResult?.error && <p className="text-xs text-red-500 px-0.5">{syncResult.error}</p>}
+              <div className="rounded-xl border border-amber-100 overflow-hidden divide-y divide-amber-50 max-h-40 overflow-y-auto">
+                {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="flex items-start justify-between gap-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
+            <div className="flex items-start gap-1.5 text-xs text-red-600">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 mt-0.5 shrink-0"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd"/></svg>
+              <span>スプレッドシートの取得に失敗しました。アプリ内の社員情報から発報できますが、発報先を確認してから発報してください。</span>
+            </div>
+            <button
+              type="button"
+              onClick={fetchGasPreview}
+              disabled={gasPending}
+              className="text-xs font-semibold text-red-600 hover:text-red-700 underline shrink-0 transition-colors"
+            >
+              再取得
+            </button>
+          </div>
+        )}
+      </div>
+      </div>
+
       {/* ── 対象選択 ── */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900">対象選択</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
+      <div className="space-y-2">
+        <h2 className="text-base font-bold text-gray-900">対象選択</h2>
+        <div className="flex items-center justify-between px-0.5">
           <button
             type="button"
             onClick={toggleAll}
@@ -141,64 +219,8 @@ export function DispatchManager({
           >
             {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
           </button>
+          <span className="text-sm text-gray-500">{checked.size}名を選択中</span>
         </div>
-      </div>
-
-      {/* ── スプレッドシート取得 ── */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
-          <span>
-            {lastUpdatedAt
-              ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
-              : '未取得'}
-          </span>
-          <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
-        </div>
-        <button
-          type="button"
-          onClick={fetchGasPreview}
-          disabled={gasPending}
-          className="w-full py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-xl transition-colors"
-        >
-          {gasPending ? '取得中…' : '社員情報をスプレッドシートから取得'}
-        </button>
-
-        {preview && !preview.ok && (
-          <p className="text-xs text-red-500 px-0.5">{preview.error}</p>
-        )}
-
-        {preview?.ok && (
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
-            {preview.diff.length === 0 ? (
-              <p className="text-xs text-emerald-600">変更はありません（スプレッドシートと一致しています）</p>
-            ) : (
-              <>
-                <p className="text-xs text-gray-500">{preview.diff.length}件の変更が検出されました</p>
-                <div className="rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-48 overflow-y-auto">
-                  {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
-                </div>
-                {syncResult?.ok ? (
-                  <p className="text-xs text-emerald-600">同期が完了しました。ページを再読み込みしてください。</p>
-                ) : (
-                  <>
-                    {syncResult?.error && <p className="text-xs text-red-500">{syncResult.error}</p>}
-                    <button
-                      type="button"
-                      onClick={applySync}
-                      disabled={syncPending}
-                      className="w-full py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-xl transition-colors"
-                    >
-                      {syncPending ? '同期中…' : '同期を適用する'}
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ── 社員一覧 ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* テーブルヘッダー */}
@@ -253,6 +275,7 @@ export function DispatchManager({
           ))}
         </div>
 
+      </div>
       </div>
 
       {/* 発報モーダル */}
