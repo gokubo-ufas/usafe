@@ -240,7 +240,7 @@ export function DispatchManager({
           type="button"
           onClick={() => setModal('production')}
           disabled={checked.size === 0}
-          className="py-4 text-sm font-bold bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
+          className="py-4 text-sm font-bold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-40"
         >
           本番発報
         </button>
@@ -303,7 +303,7 @@ function DispatchModal({
           {/* モーダルヘッダー */}
           <div className={cn(
             'px-5 pt-4 pb-3 shrink-0 border-b',
-            isDrill ? 'bg-amber-400 border-amber-500' : 'bg-gray-900 border-gray-800',
+            isDrill ? 'bg-amber-400 border-amber-500' : 'bg-red-500 border-red-600',
           )}>
             <div className="flex items-center justify-between">
               <h2 className={cn('text-base font-bold', isDrill ? 'text-amber-950' : 'text-white')}>
@@ -312,14 +312,14 @@ function DispatchModal({
               <button
                 type="button"
                 onClick={onClose}
-                className={cn('w-8 h-8 flex items-center justify-center', isDrill ? 'text-amber-800 hover:text-amber-950' : 'text-white/50 hover:text-white')}
+                className={cn('w-8 h-8 flex items-center justify-center', isDrill ? 'text-amber-800 hover:text-amber-950' : 'text-white/70 hover:text-white')}
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p className={cn('text-xs mt-0.5', isDrill ? 'text-amber-800' : 'text-gray-400')}>
+            <p className={cn('text-xs mt-0.5', isDrill ? 'text-amber-800' : 'text-white/70')}>
               {employeeCount}名に安否確認を送信します
             </p>
           </div>
@@ -406,7 +406,7 @@ function DispatchModal({
                   'flex-1 py-3 text-sm font-bold disabled:opacity-40 transition-colors',
                   isDrill
                     ? 'border-2 border-amber-300 text-amber-700 bg-white hover:bg-amber-50'
-                    : 'bg-gray-900 text-white hover:bg-gray-800',
+                    : 'bg-red-500 text-white hover:bg-red-600',
                 )}
               >
                 {isPending ? '発報中…' : '発報する'}
