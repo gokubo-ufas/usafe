@@ -25,15 +25,14 @@ export default async function DashboardPage() {
 
   if (!latestEvent) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+      <div className="bg-white/[0.06] backdrop-blur-sm border border-white/10 rounded-2xl p-10 text-center">
         <div className="text-4xl mb-4">✅</div>
-        <h2 className="text-base font-semibold text-gray-800 mb-1">現在イベントはありません</h2>
-        <p className="text-sm text-gray-400">安否確認が発報されると、ここに表示されます。</p>
+        <h2 className="text-base font-semibold text-white/80 mb-1">現在イベントはありません</h2>
+        <p className="text-sm text-white/30">安否確認が発報されると、ここに表示されます。</p>
       </div>
     )
   }
 
-  // 自分の最新イベントへの回答を確認
   const { data: myLatestResponse } = await admin
     .from('responses')
     .select('self_status')
@@ -43,18 +42,10 @@ export default async function DashboardPage() {
 
   const hasAnswered = !!myLatestResponse?.self_status
 
-  // 未回答 → インラインフォームを表示
   if (!hasAnswered) {
-    const bgClass = latestEvent.event_type === 'test' ? 'bg-amber-50' : 'bg-red-50'
-    return (
-      <>
-        <div className={`fixed inset-0 -z-10 ${bgClass}`} />
-        <InlineResponseForm event={latestEvent as Event} />
-      </>
-    )
+    return <InlineResponseForm event={latestEvent as Event} />
   }
 
-  // 回答済み → 発報一覧を表示
   const [{ data: allEvents }, { data: allResponses }] = await Promise.all([
     admin
       .from('events')
@@ -69,7 +60,6 @@ export default async function DashboardPage() {
 
   const events = (allEvents ?? []) as Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id' | 'max_intensity' | 'epicenter'>[]
 
-  // イベントごとの最新回答で集計
   const latestByKey = new Map<string, Response>()
   for (const r of (allResponses ?? []) as Response[]) {
     const key = `${r.event_id}:${r.employee_number}`
@@ -108,18 +98,17 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {/* アクション */}
       <div className="flex gap-3 pt-2">
         <Link
           href="/dispatch"
-          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-300 rounded-xl hover:bg-red-50 transition-colors"
+          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/10 transition-colors"
         >
           発報管理
         </Link>
         <form action={signOut} className="flex-1">
           <button
             type="submit"
-            className="w-full py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+            className="w-full py-2.5 text-sm font-medium text-white/40 border border-white/10 rounded-xl hover:bg-white/[0.06] transition-colors"
           >
             ログアウト
           </button>
@@ -133,7 +122,7 @@ function SectionLabel({ children, muted }: { children: React.ReactNode; muted?: 
   return (
     <h2 className={cn(
       'text-xs font-bold uppercase tracking-widest px-1',
-      muted ? 'text-gray-400' : 'text-emerald-600',
+      muted ? 'text-white/20' : 'text-emerald-400',
     )}>
       {children}
     </h2>
@@ -151,49 +140,51 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
   return (
     <Link
       href={`/events/${event.event_id}`}
-      className="block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="block bg-white/[0.05] backdrop-blur-sm border border-white/[0.08] rounded-2xl hover:bg-white/[0.08] hover:border-white/[0.12] transition-all overflow-hidden"
     >
-      <div className={cn('h-1 w-full', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
+      <div className={cn('h-0.5 w-full', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
       <div className="px-4 py-3 flex items-center gap-3">
         <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={cn(
-              'text-xs font-bold px-2 py-0.5 rounded-full',
-              isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800',
+              'text-xs font-bold px-2 py-0.5 rounded-full border',
+              isDrill
+                ? 'bg-amber-400/20 text-amber-300 border-amber-400/30'
+                : 'bg-red-500/20 text-red-300 border-red-500/30',
             )}>
               {isDrill ? '🟡 訓練' : '🔴 本番'}
             </span>
-            <span className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
+            <span className="text-xs text-white/30 tabular-nums">{formatDateTime(event.issued_at)}</span>
           </div>
           {event.max_intensity != null && (
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-white/50">
               震度{formatIntensity(event.max_intensity)}{event.epicenter ? `　${event.epicenter}` : ''}
             </p>
           )}
           {!event.max_intensity && event.comment && (
-            <p className="text-xs text-gray-500 truncate">{event.comment}</p>
+            <p className="text-xs text-white/40 truncate">{event.comment}</p>
           )}
         </div>
 
         <div className="text-right shrink-0 space-y-1">
-          <p className="text-sm font-bold text-gray-900 tabular-nums">
-            {answered}<span className="text-xs font-normal text-gray-400"> / {total}名</span>
+          <p className="text-sm font-bold text-white/80 tabular-nums">
+            {answered}<span className="text-xs font-normal text-white/30"> / {total}名</span>
           </p>
           <div className="flex items-center gap-1 justify-end flex-wrap">
             {(counts?.critical ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-red-300 bg-red-500/15 px-1.5 py-0.5 rounded-full">
                 要対応 {counts!.critical}
               </span>
             )}
             {(counts?.unanswered ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-white/40 bg-white/[0.08] px-1.5 py-0.5 rounded-full">
                 未回答 {counts!.unanswered}
               </span>
             )}
           </div>
         </div>
 
-        <svg className="w-4 h-4 text-gray-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 text-white/20 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
         </svg>
       </div>

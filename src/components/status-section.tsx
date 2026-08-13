@@ -30,46 +30,46 @@ const SUMMARY_CONFIG = {
   critical: {
     label: '要対応',
     description: '負傷・救助要請あり',
-    fg: 'text-red-600',
-    gradFrom: 'from-red-50',
-    border: 'border-red-200',
-    accentBorder: 'border-l-red-400',
-    headerBg: 'bg-red-50/60',
-    badgeClass: 'bg-red-100 text-red-600',
-    dot: 'bg-red-400',
+    fg: 'text-red-400',
+    border: 'border-red-500/40',
+    accentBorder: 'border-l-red-500',
+    headerBg: 'bg-red-500/10',
+    badgeClass: 'bg-red-500/20 text-red-300',
+    cardBg: 'bg-red-500/5',
+    activeBorder: 'border-red-500/50',
   },
   checking: {
     label: '確認中',
     description: '家族の安否を確認中',
-    fg: 'text-amber-600',
-    gradFrom: 'from-amber-50',
-    border: 'border-amber-200',
+    fg: 'text-amber-400',
+    border: 'border-amber-500/40',
     accentBorder: 'border-l-amber-400',
-    headerBg: 'bg-amber-50/60',
-    badgeClass: 'bg-amber-100 text-amber-600',
-    dot: 'bg-amber-400',
+    headerBg: 'bg-amber-500/10',
+    badgeClass: 'bg-amber-500/20 text-amber-300',
+    cardBg: 'bg-amber-500/5',
+    activeBorder: 'border-amber-500/50',
   },
   unanswered: {
     label: '未回答',
     description: 'まだ回答がない',
-    fg: 'text-gray-400',
-    gradFrom: 'from-gray-50',
-    border: 'border-gray-200',
-    accentBorder: 'border-l-gray-300',
-    headerBg: 'bg-gray-50/60',
-    badgeClass: 'bg-gray-100 text-gray-500',
-    dot: 'bg-gray-300',
+    fg: 'text-white/50',
+    border: 'border-white/15',
+    accentBorder: 'border-l-white/25',
+    headerBg: 'bg-white/5',
+    badgeClass: 'bg-white/10 text-white/60',
+    cardBg: 'bg-white/[0.03]',
+    activeBorder: 'border-white/25',
   },
   safe: {
     label: '無事',
     description: '本人・家族ともに安全',
-    fg: 'text-emerald-600',
-    gradFrom: 'from-emerald-50',
-    border: 'border-emerald-200',
-    accentBorder: 'border-l-emerald-400',
-    headerBg: 'bg-emerald-50/60',
-    badgeClass: 'bg-emerald-100 text-emerald-600',
-    dot: 'bg-emerald-400',
+    fg: 'text-emerald-400',
+    border: 'border-emerald-500/40',
+    accentBorder: 'border-l-emerald-500',
+    headerBg: 'bg-emerald-500/10',
+    badgeClass: 'bg-emerald-500/20 text-emerald-300',
+    cardBg: 'bg-emerald-500/5',
+    activeBorder: 'border-emerald-500/50',
   },
 } as const
 
@@ -85,13 +85,9 @@ function formatAnsweredAt(iso: string): string {
     : d.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-// ─────────────────────────────────────────
-// EmployeeGrid
-// ─────────────────────────────────────────
-
 function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
   return (
-    <div className="divide-y divide-gray-100/80">
+    <div className="divide-y divide-white/[0.06]">
       {members.map((emp) => {
         const r: Response | null = emp.latestResponse
         const answered = r && r.self_status !== null
@@ -102,34 +98,30 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
 
         return (
           <div key={emp.employee_number} className="px-4 py-2.5 space-y-1">
-
-            {/* 行1：氏名 + 最終更新日時 */}
             <div className="flex items-center justify-between gap-2 min-w-0">
-              <span className="text-sm font-semibold text-gray-800 truncate min-w-0">{emp.name}</span>
-              <span className="text-[10px] text-gray-300 whitespace-nowrap tabular-nums shrink-0">
+              <span className="text-sm font-semibold text-white/80 truncate min-w-0">{emp.name}</span>
+              <span className="text-[10px] text-white/25 whitespace-nowrap tabular-nums shrink-0">
                 {answered && r ? formatAnsweredAt(r.created_at) : ''}
               </span>
             </div>
 
-            {/* 行2：本人・家族・業務 等分3列（全行揃え） */}
             <div className="grid grid-cols-3 gap-x-1 text-[11px]">
               <span>
-                <span className="text-gray-400">本人：</span>
-                <span className="font-semibold text-gray-700">{selfVal}</span>
+                <span className="text-white/30">本人：</span>
+                <span className="font-semibold text-white/70">{selfVal}</span>
               </span>
               <span>
-                <span className="text-gray-400">家族：</span>
-                <span className="font-semibold text-gray-700">{familyVal}</span>
+                <span className="text-white/30">家族：</span>
+                <span className="font-semibold text-white/70">{familyVal}</span>
               </span>
               <span>
-                <span className="text-gray-400">業務：</span>
-                <span className="font-semibold text-gray-700">{workVal}</span>
+                <span className="text-white/30">業務：</span>
+                <span className="font-semibold text-white/70">{workVal}</span>
               </span>
             </div>
 
-            {/* 行3：コメント（あれば左詰め） */}
             {r?.comment && (
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-white/30">
                 コメント：{r.comment}
               </div>
             )}
@@ -139,10 +131,6 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
     </div>
   )
 }
-
-// ─────────────────────────────────────────
-// StatusSection
-// ─────────────────────────────────────────
 
 export function StatusSection({ employees, middleSlot }: { employees: EmployeeWithStatus[]; middleSlot?: ReactNode }) {
   const [dept, setDept] = useState('')
@@ -182,11 +170,10 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
               onClick={() => setGroupFilter(isActive ? '' : key)}
               disabled={total === 0}
               className={cn(
-                'rounded-xl border bg-gradient-to-br to-white px-2 py-3 text-center transition-all duration-200',
-                summary.gradFrom,
+                'rounded-xl border px-2 py-3 text-center transition-all duration-200',
                 isActive
-                  ? cn('border-2', summary.border, 'shadow-lg scale-[1.03]')
-                  : 'border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.01]',
+                  ? cn('border-2', summary.activeBorder, summary.cardBg, 'scale-[1.03]')
+                  : cn('border', summary.border, 'bg-white/[0.04] hover:bg-white/[0.07] hover:scale-[1.01]'),
                 total === 0 && 'opacity-25 cursor-default pointer-events-none',
               )}
             >
@@ -196,7 +183,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
               <div className={cn('text-2xl font-bold tabular-nums tracking-tight mt-0.5', summary.fg)}>
                 {total}
               </div>
-              <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">
+              <div className="text-[9px] text-white/25 mt-0.5 leading-tight">
                 {summary.description}
               </div>
             </button>
@@ -209,7 +196,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
         <select
           value={dept}
           onChange={(e) => setDept(e.target.value)}
-          className="w-full text-sm text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent shadow-sm"
+          className="w-full text-sm text-white/70 bg-white/[0.06] border border-white/10 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/30"
         >
           <option value="">全部署</option>
           {departments.map((d) => (
@@ -220,13 +207,12 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
 
       {/* グループ一覧 */}
       {visibleGroups.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-8">該当する社員がいません</p>
+        <p className="text-sm text-white/30 text-center py-8">該当する社員がいません</p>
       ) : (
         <div className="space-y-3">
           {visibleGroups.map(({ key, config, summary, members }) => (
-            <div key={key} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div key={key} className="bg-white/[0.04] backdrop-blur-sm rounded-2xl border border-white/[0.08] overflow-hidden">
 
-              {/* グループヘッダー */}
               <div className={cn(
                 'flex items-center gap-2.5 px-4 py-2.5 border-l-4',
                 summary.headerBg,
@@ -238,7 +224,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
                 <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0', summary.badgeClass)}>
                   {members.length}名
                 </span>
-                <p className="text-[10px] text-gray-400 truncate flex-1 text-right">{summary.description}</p>
+                <p className="text-[10px] text-white/25 truncate flex-1 text-right">{summary.description}</p>
               </div>
 
               <EmployeeGrid members={members} />

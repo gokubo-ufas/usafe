@@ -2,8 +2,8 @@ import Link from 'next/link'
 
 export function Header() {
   return (
-    <header className="bg-gradient-to-r from-emerald-50 to-white border-b border-emerald-100 sticky top-0 z-40 backdrop-blur-sm">
-      <div className="max-w-4xl mx-auto px-4 h-14 flex items-center">
+    <header className="bg-gray-950/90 border-b border-white/[0.08] sticky top-0 z-40 backdrop-blur-md">
+      <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
         <Link href="/dashboard" className="flex items-center gap-2">
           <svg viewBox="0 0 32 32" className="w-7 h-7 shrink-0" fill="none" aria-hidden>
             <path
@@ -22,7 +22,7 @@ export function Header() {
               </linearGradient>
             </defs>
           </svg>
-          <span className="text-emerald-700 font-bold text-xl tracking-tight">U-Safe</span>
+          <span className="text-white font-bold text-xl tracking-tight">U-Safe</span>
         </Link>
       </div>
     </header>
