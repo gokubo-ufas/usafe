@@ -153,7 +153,7 @@ export function DispatchManager({
               ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
               : '未取得'}
           </span>
-          <span>在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名</span>
+          <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
         </div>
         {/* 照合ステータス行 */}
         {(gasPending || preview === null) ? (

@@ -27,13 +27,17 @@ export async function GET(): Promise<Response> {
   try {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), 15_000)
-    const res = await fetch(gasUrl, { signal: controller.signal })
+    const res = await fetch(gasUrl, { signal: controller.signal, cache: 'no-store', redirect: 'follow' })
     clearTimeout(id)
-    if (!res.ok) throw new Error(`GAS returned ${res.status}`)
+    if (!res.ok) throw new Error(`GAS returned ${res.status}: ${await res.text().then(t => t.slice(0, 200))}`)
     incoming = (await res.json()) as EmployeeRow[]
   } catch (err) {
-    console.error('[preview] GAS fetch error:', err instanceof Error ? err.message : err)
-    return Response.json({ ok: false, error: 'GASからの取得に失敗しました' } satisfies PreviewResult, { status: 502 })
+    const detail = err instanceof Error ? err.message : String(err)
+    console.error('[preview] GAS fetch error:', detail)
+    const userMsg = detail.includes('abort')
+      ? 'GASへの接続がタイムアウトしました（15秒）'
+      : `GASからの取得に失敗しました（${detail}）`
+    return Response.json({ ok: false, error: userMsg } satisfies PreviewResult, { status: 502 })
   }
 
   const admin = createAdminClient()
