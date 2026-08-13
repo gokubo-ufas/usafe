@@ -85,7 +85,7 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
   }
 
   const issuedAt = new Date()
-  const slackResult = await postSlackAlert({ type: 'production', comment, issuedAt })
+  const slackResult = await postSlackAlert({ type: 'earthquake', comment, issuedAt })
 
   if (slackResult.ok) {
     return { success: '安否確認を発報しました。' }
