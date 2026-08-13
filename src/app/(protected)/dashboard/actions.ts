@@ -62,5 +62,6 @@ export async function submitResponse(_prev: State, formData: FormData): Promise<
   }
 
   revalidatePath('/dashboard')
+  revalidatePath('/events', 'layout')
   return {}
 }

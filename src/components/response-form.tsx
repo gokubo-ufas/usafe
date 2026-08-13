@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef, useState } from 'react'
-import { submitResponse } from './actions'
+import { submitResponse } from '@/app/(protected)/dashboard/actions'
 import type { Response } from '@/types'
 
 type State = { error?: string }
@@ -87,7 +87,6 @@ function ModalForm({
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs max-h-[92vh] flex flex-col">
-        {/* ヘッダー */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
           <h2 className="text-base font-bold text-gray-900">安否報告</h2>
           <button
@@ -102,64 +101,40 @@ function ModalForm({
           </button>
         </div>
 
-        {/* フォーム本体 */}
         <form action={formAction} className="overflow-y-auto flex-1 px-5 py-3 space-y-4">
           <input type="hidden" name="event_id" value={eventId} />
-
-          <RadioGroup
-            name="self_status"
-            legend="本人の状況"
-            options={SELF_OPTIONS}
-            defaultValue={current?.self_status}
-          />
-          <RadioGroup
-            name="family_status"
-            legend="家族の状況"
-            options={FAMILY_OPTIONS}
-            defaultValue={current?.family_status}
-          />
-          <RadioGroup
-            name="work_status"
-            legend="業務対応"
-            options={WORK_OPTIONS}
-            defaultValue={current?.work_status}
-          />
+          <RadioGroup name="self_status"   legend="本人の状況" options={SELF_OPTIONS}   defaultValue={current?.self_status}   />
+          <RadioGroup name="family_status" legend="家族の状況" options={FAMILY_OPTIONS} defaultValue={current?.family_status} />
+          <RadioGroup name="work_status"   legend="業務対応"   options={WORK_OPTIONS}   defaultValue={current?.work_status}   />
 
           <div>
-            <label htmlFor="resp-comment" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="resp-comment" className="block text-sm font-semibold text-gray-700 mb-1.5">
               コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
             </label>
             <textarea
               id="resp-comment"
               name="comment"
-              rows={3}
+              rows={2}
               maxLength={50}
               defaultValue={current?.comment ?? ''}
-              placeholder="状況を補足するコメントがあれば入力してください"
-              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              placeholder="状況を補足するコメントがあれば"
+              className="w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
 
           {state.error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
               {state.error}
             </p>
           )}
 
           <div className="flex gap-3 pb-1">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
+            <button type="button" onClick={onClose} disabled={isPending}
+              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors">
               キャンセル
             </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors"
-            >
+            <button type="submit" disabled={isPending}
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-colors">
               {isPending ? '送信中…' : '送信する'}
             </button>
           </div>
@@ -184,16 +159,12 @@ export function ResponseForm({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full py-3 bg-emerald-700 text-white font-semibold rounded-xl hover:bg-emerald-800 transition-colors text-sm"
+        className="w-full py-2.5 bg-emerald-700 text-white text-sm font-semibold rounded-xl hover:bg-emerald-800 transition-colors"
       >
         {hasAnswered ? '回答を更新する' : '安否を報告する'}
       </button>
       {open && (
-        <ModalForm
-          eventId={eventId}
-          current={currentResponse}
-          onClose={() => setOpen(false)}
-        />
+        <ModalForm eventId={eventId} current={currentResponse} onClose={() => setOpen(false)} />
       )}
     </>
   )

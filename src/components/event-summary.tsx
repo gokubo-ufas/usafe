@@ -1,13 +1,5 @@
 import type { Event } from '@/types'
-import { formatDateTime, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
-
-const INTENSITY_MAP: Record<number, string> = {
-  10: '1', 20: '2', 30: '3', 40: '4',
-  45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7',
-}
-function formatIntensity(n: number): string {
-  return INTENSITY_MAP[n] ?? String(n)
-}
+import { formatDateTime, formatIntensity, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
 
 type Props = {
   event: Event

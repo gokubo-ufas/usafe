@@ -42,7 +42,6 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1">
-          <NavItem href="/history">履歴</NavItem>
           <AlertNavItem href="/dispatch">発報管理</AlertNavItem>
           <form action={signOut}>
             <button
@@ -75,9 +74,6 @@ export function Header() {
       {/* Mobile menu */}
       {open && (
         <div className="sm:hidden border-t border-gray-100 bg-white divide-y divide-gray-50">
-          <MobileNavItem href="/history" onClick={() => setOpen(false)}>
-            履歴
-          </MobileNavItem>
           <MobileAlertNavItem href="/dispatch" onClick={() => setOpen(false)}>
             発報管理
           </MobileAlertNavItem>
