@@ -101,12 +101,19 @@ export default async function DashboardPage() {
       {latest && (
         <section>
           <h2 className="text-base font-bold text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
-          <Link href={`/events/${latest.event_id}`} className="block">
+          <Link href={`/events/${latest.event_id}`} className="block group">
             <EventSummary
               event={latest as Event}
               answeredCount={(countMap.get(latest.event_id)?.safe ?? 0) + (countMap.get(latest.event_id)?.critical ?? 0) + (countMap.get(latest.event_id)?.checking ?? 0)}
               totalCount={countMap.get(latest.event_id)?.total ?? 0}
+              showProgress={false}
             />
+            <div className="flex items-center justify-center gap-1.5 py-2.5 bg-white border-b border-gray-100 text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
+              回答状況・詳細を確認する
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
           </Link>
         </section>
       )}
@@ -149,47 +156,50 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
       href={`/events/${event.event_id}`}
       className="block bg-white hover:bg-gray-50 transition-colors"
     >
-      <div className="flex items-center gap-3 px-4 py-3.5">
+      <div className="flex items-stretch gap-3 px-4 py-3.5">
         {/* 左アクセントライン */}
-        <div className={cn('w-1 self-stretch shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
+        <div className={cn('w-1 shrink-0', isDrill ? 'bg-amber-300' : 'bg-red-400')} />
 
         <div className="flex-1 min-w-0">
-          {/* 発報タイプ・日時 */}
-          <div className="flex items-center gap-2 mb-1">
-            <span className={cn('text-xs font-bold px-2 py-0.5', isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
-              {isDrill ? '訓練' : '本番'}
-            </span>
-            <span className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
+          {/* 上段：発報タイプ＋日時（左）　回答数（右） */}
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className={cn('text-[10px] font-bold px-1.5 py-0.5 shrink-0', isDrill ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}>
+                {isDrill ? '訓練' : '本番'}
+              </span>
+              <span className="text-[11px] text-gray-400 tabular-nums truncate">{formatDateTime(event.issued_at)}</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-500 tabular-nums shrink-0">{answered}<span className="font-normal text-gray-400"> / {total}名</span></span>
           </div>
 
-          {/* 1行目：震度＋震源地 */}
+          {/* 震度＋震源地（大きめ） */}
           {event.max_intensity != null ? (
-            <p className="text-sm font-bold text-gray-800 mb-0.5">
+            <p className="text-base font-bold text-gray-800 mb-1 leading-snug">
               震度{formatIntensity(event.max_intensity)}
-              {event.epicenter && <span className="font-normal text-gray-500 ml-2">{event.epicenter}</span>}
+              {event.epicenter && <span className="text-sm font-normal text-gray-500 ml-2">{event.epicenter}</span>}
             </p>
           ) : (
-            <div className="mb-0.5" />
+            <p className="text-sm font-semibold text-gray-600 mb-1">安否確認</p>
           )}
 
-          {/* 2行目：特記事項 */}
-          <p className="text-xs text-gray-500 truncate mb-2">
-            <span className="text-gray-400 mr-1">特記事項</span>
-            {event.comment ?? '—'}
+          {/* 特記事項 */}
+          <p className="text-xs text-gray-400 truncate mb-2">
+            <span className="mr-1">特記事項</span>
+            <span className="text-gray-500">{event.comment ?? '—'}</span>
           </p>
 
-          {/* ステータス（4区分・常時表示） */}
-          <div className="grid grid-cols-4 gap-1">
+          {/* ステータス（静かなテキスト表示） */}
+          <div className="flex items-center gap-3">
             {STATUS_ITEMS.map(({ key, label }) => (
-              <span key={key} className={cn('text-[10px] font-semibold px-1.5 py-0.5 text-center', STATUS_GROUP_CONFIG[key].badgeClass)}>
-                {label} {counts?.[key] ?? 0}
+              <span key={key} className="text-[10px] tabular-nums">
+                <span className={STATUS_GROUP_CONFIG[key].textColor + ' font-bold'}>{counts?.[key] ?? 0}</span>
+                <span className="text-gray-400 ml-0.5">{label}</span>
               </span>
             ))}
           </div>
-          <p className="text-[10px] text-gray-400 mt-1 tabular-nums">{answered} / {total}名 回答済み</p>
         </div>
 
-        <svg className="w-4 h-4 text-gray-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 text-gray-300 shrink-0 self-center" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
         </svg>
       </div>
