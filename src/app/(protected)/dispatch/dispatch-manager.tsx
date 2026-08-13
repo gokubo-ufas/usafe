@@ -113,67 +113,20 @@ export function DispatchManager({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* ヘッダー */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-          <div>
-            <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
-            {lastUpdatedAt && (
-              <p className="text-[10px] text-gray-400 mt-0.5">
-                最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-                  timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
-                  day: '2-digit', hour: '2-digit', minute: '2-digit',
-                })}　在籍中 {activeEmployees.length}名 / 対象外 {retiredEmployees.length}名
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={fetchGasPreview}
-            disabled={gasPending}
-            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-40 transition-colors"
-          >
-            {gasPending ? '取得中…' : 'スプシから更新'}
-          </button>
+        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+          <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
+          {lastUpdatedAt && (
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
+                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
+                day: '2-digit', hour: '2-digit', minute: '2-digit',
+              })}　在籍中 {activeEmployees.length}名 / 対象外 {retiredEmployees.length}名
+            </p>
+          )}
         </div>
 
-        {/* GAS同期差分 */}
-        {preview && !preview.ok && (
-          <div className="px-4 py-2 bg-red-50 border-b border-red-100">
-            <p className="text-xs text-red-500">{preview.error}</p>
-          </div>
-        )}
-
-        {preview?.ok && (
-          <div className="px-4 py-3 border-b border-gray-100 space-y-2">
-            {preview.diff.length === 0 ? (
-              <p className="text-xs text-emerald-600">変更はありません（スプレッドシートと一致しています）</p>
-            ) : (
-              <>
-                <p className="text-xs text-gray-500">{preview.diff.length}件の変更が検出されました</p>
-                <div className="rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-40 overflow-y-auto">
-                  {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
-                </div>
-                {syncResult?.ok ? (
-                  <p className="text-xs text-emerald-600">同期が完了しました。ページを再読み込みしてください。</p>
-                ) : (
-                  <>
-                    {syncResult?.error && <p className="text-xs text-red-500">{syncResult.error}</p>}
-                    <button
-                      type="button"
-                      onClick={applySync}
-                      disabled={syncPending}
-                      className="w-full py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 rounded-xl transition-colors"
-                    >
-                      {syncPending ? '同期中…' : '同期を適用する'}
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
         {/* テーブルヘッダー */}
-        <div className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
           <div className="flex items-center pr-3">
             <input
               type="checkbox"
@@ -182,18 +135,18 @@ export function DispatchManager({
               className="w-4 h-4 accent-emerald-600 cursor-pointer"
             />
           </div>
-          <span className="pr-3">状態</span>
-          <span>部署</span>
-          <span>社員番号</span>
           <span>氏名</span>
+          <span>社員番号</span>
+          <span>部署</span>
+          <span className="pl-3">在籍状況</span>
         </div>
 
-        {/* 在籍中 */}
+        {/* 全社員（在籍中→対象外の順） */}
         <div className="divide-y divide-gray-100/80">
           {activeEmployees.map(emp => (
             <label
               key={emp.employee_number}
-              className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
+              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
             >
               <div className="flex items-center pr-3">
                 <input
@@ -203,46 +156,37 @@ export function DispatchManager({
                   className="w-4 h-4 accent-emerald-600"
                 />
               </div>
-              <div className="flex items-center pr-3">
+              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
+              <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
+              <div className="flex items-center pl-3">
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
                   在籍中
                 </span>
               </div>
-              <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
-              <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
-              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
             </label>
           ))}
+          {retiredEmployees.map(emp => (
+            <div
+              key={emp.employee_number}
+              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs opacity-40"
+            >
+              <div className="flex items-center pr-3">
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
+                  対象外
+                </span>
+              </div>
+              <span className="font-medium text-gray-700 truncate self-center">{emp.name}</span>
+              <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
+              <div className="flex items-center pl-3">
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
+                  退職済
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* 対象外（退職済）*/}
-        {retiredEmployees.length > 0 && (
-          <>
-            <div className="px-4 py-1.5 bg-gray-50/60 border-t border-gray-100">
-              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">対象外</span>
-            </div>
-            <div className="divide-y divide-gray-100/60">
-              {retiredEmployees.map(emp => (
-                <div
-                  key={emp.employee_number}
-                  className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs opacity-40"
-                >
-                  <div className="flex items-center pr-3">
-                    <span className="w-4 h-4 inline-block" />
-                  </div>
-                  <div className="flex items-center pr-3">
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
-                      退職済
-                    </span>
-                  </div>
-                  <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
-                  <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
-                  <span className="font-medium text-gray-700 truncate self-center">{emp.name}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
 
         {/* フッター */}
         <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
@@ -283,6 +227,55 @@ export function DispatchManager({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── 社員マスタ更新 ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-gray-800">社員マスタ更新</h2>
+          <button
+            type="button"
+            onClick={fetchGasPreview}
+            disabled={gasPending}
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-40 transition-colors"
+          >
+            {gasPending ? '取得中…' : 'スプレッドシートから取得'}
+          </button>
+        </div>
+
+        {preview && !preview.ok && (
+          <p className="text-xs text-red-500">{preview.error}</p>
+        )}
+
+        {preview?.ok && (
+          <div className="space-y-3">
+            {preview.diff.length === 0 ? (
+              <p className="text-xs text-emerald-600">変更はありません（スプレッドシートと一致しています）</p>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500">{preview.diff.length}件の変更が検出されました</p>
+                <div className="rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                  {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
+                </div>
+                {syncResult?.ok ? (
+                  <p className="text-xs text-emerald-600">同期が完了しました。ページを再読み込みしてください。</p>
+                ) : (
+                  <>
+                    {syncResult?.error && <p className="text-xs text-red-500">{syncResult.error}</p>}
+                    <button
+                      type="button"
+                      onClick={applySync}
+                      disabled={syncPending}
+                      className="w-full py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 rounded-xl transition-colors"
+                    >
+                      {syncPending ? '同期中…' : '同期を適用する'}
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 発報モーダル */}
