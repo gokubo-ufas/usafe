@@ -36,17 +36,17 @@ export function Header() {
         </Link>
 
         {showNav && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Link
               href="/dispatch"
-              className="text-xs font-medium text-white/60 hover:text-white transition-colors"
+              className="text-xs font-medium text-white/60 hover:text-white border border-white/20 hover:border-white/40 px-3 py-1.5 transition-colors"
             >
               発報管理
             </Link>
             <form action={signOut}>
               <button
                 type="submit"
-                className="text-xs font-medium text-white/60 hover:text-white transition-colors"
+                className="text-xs font-medium text-white/60 hover:text-white border border-white/20 hover:border-white/40 px-3 py-1.5 transition-colors"
               >
                 ログアウト
               </button>
