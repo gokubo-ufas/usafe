@@ -21,6 +21,8 @@ export type Response = {
   id: number
   event_id: string
   employee_number: string
+  name: string | null
+  department: string | null
   self_status: 'safe' | 'injured' | 'need_rescue' | null
   family_status: 'safe' | 'injured' | 'need_rescue' | 'checking' | 'not_applicable' | null
   work_status: 'available' | 'unavailable' | null

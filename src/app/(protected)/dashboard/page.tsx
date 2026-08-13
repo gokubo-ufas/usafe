@@ -27,19 +27,13 @@ export default async function DashboardPage() {
   let answeredCount = 0
 
   if (latestEvent) {
-    const [{ data: allResponses }, { data: allEmployees }] = await Promise.all([
-      admin
-        .from('responses')
-        .select('*')
-        .eq('event_id', latestEvent.event_id)
-        .order('created_at', { ascending: false }),
-      admin
-        .from('employees')
-        .select('employee_number, name, email, department'),
-    ])
+    const { data: allResponses } = await admin
+      .from('responses')
+      .select('*')
+      .eq('event_id', latestEvent.event_id)
+      .order('created_at', { ascending: false })
 
     const responses = (allResponses ?? []) as Response[]
-    const employeeMap = new Map((allEmployees ?? []).map((e) => [e.employee_number, e]))
 
     // responses をベースに最新1件/社員を確定（発報当時の対象者が基準）
     const latestByEmployee = new Map<string, Response>()
@@ -54,21 +48,18 @@ export default async function DashboardPage() {
     myResponse = latestByEmployee.get(employee.employee_number) ?? null
 
     employeesWithStatus = [...latestByEmployee.entries()]
-      .map(([empNum, latestResponse]) => {
-        const emp = employeeMap.get(empNum)
-        return {
-          employee_number: empNum,
-          name:       emp?.name       ?? empNum,
-          email:      emp?.email      ?? '',
-          department: emp?.department ?? null,
-          latestResponse,
-          statusGroup: getStatusGroup(latestResponse),
-        }
-      })
-      .sort((a, b) => {
-        const nA = Number(a.employee_number), nB = Number(b.employee_number)
-        return !isNaN(nA) && !isNaN(nB) ? nA - nB : a.employee_number.localeCompare(b.employee_number, 'ja')
-      })
+      .map(([empNum, latestResponse]) => ({
+        employee_number: empNum,
+        name:       latestResponse.name       ?? empNum,
+        email:      '',
+        department: latestResponse.department ?? null,
+        latestResponse,
+        statusGroup: getStatusGroup(latestResponse),
+      }))
+      .sort((a, b) =>
+        new Date(b.latestResponse!.created_at).getTime() -
+        new Date(a.latestResponse!.created_at).getTime()
+      )
   }
 
   const bgClass = latestEvent
