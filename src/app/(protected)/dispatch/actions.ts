@@ -54,7 +54,7 @@ export async function fetchAndSyncFromGAS(): Promise<SyncResult> {
   const { data, error } = await admin.rpc('sync_employees_from_gas', { p_employees: employees })
   if (error) {
     console.error('[fetchAndSyncFromGAS] RPC error:', error.message, error.details, error.hint)
-    return { ok: false, error: 'sync_failed' }
+    return { ok: false, error: `[DEBUG] ${error.message} / ${error.details ?? ''} / ${error.hint ?? ''}` }
   }
 
   return { ok: true, received: data.received, active: data.active }
