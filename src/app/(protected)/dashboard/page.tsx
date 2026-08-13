@@ -167,7 +167,8 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
               <span className={cn('text-[10px] font-bold px-1.5 py-0.5 shrink-0', isDrill ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}>
                 {isDrill ? '訓練' : '本番'}
               </span>
-              <span className="text-[11px] text-gray-400 tabular-nums truncate">{formatDateTime(event.issued_at)}</span>
+              <span className="text-[11px] text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
+              <span className="text-[11px] text-gray-400 truncate">発報：{event.issuer ?? '自動発報'}</span>
             </div>
             <span className="text-xs font-semibold text-gray-500 tabular-nums shrink-0">{answered}<span className="font-normal text-gray-400"> / {total}名</span></span>
           </div>
