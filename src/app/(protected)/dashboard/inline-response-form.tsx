@@ -90,7 +90,7 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
           <div>
             {event.max_intensity != null ? (
               <>
-                <p className="tracking-[0.15em] uppercase mb-0.5">最大震度</p>
+                <p className="text-xl tracking-[0.15em] uppercase mb-0.5">最大震度</p>
                 <p className="font-black leading-none tracking-tighter"
                    style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
                   {formatIntensity(event.max_intensity)}
@@ -107,7 +107,7 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
             ) : null}
           </div>
           <div className="text-right shrink-0">
-            <p className="mb-3">{answeredCount} / {totalCount}名 回答済み</p>
+            <p className="text-lg mb-3">{answeredCount} / {totalCount}名 回答済み</p>
             <p className="tabular-nums leading-relaxed">
               {formatDateTimeFull(event.issued_at)}<br />
               発報（{event.issuer ?? '自動発報'}）
@@ -117,7 +117,7 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
 
         {/* 特記事項（常時表示） */}
         <p className="leading-relaxed">
-          <span className="tracking-[0.1em] uppercase mr-2">特記事項</span>
+          <span className="tracking-[0.1em] uppercase mr-2">特記事項：</span>
           {event.comment ?? '—'}
         </p>
       </div>
