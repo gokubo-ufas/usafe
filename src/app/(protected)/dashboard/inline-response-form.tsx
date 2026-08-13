@@ -96,7 +96,7 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
                   {formatIntensity(event.max_intensity)}
                 </p>
                 {event.epicenter && (
-                  <p className="text-2xl mt-1.5">
+                  <p className="text-2xl mt-3">
                     <span className="text-sm mr-1">震源地：</span>
                     {event.epicenter}
                   </p>
@@ -107,7 +107,7 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
             ) : null}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-lg mb-3">{answeredCount} / {totalCount}名 回答済み</p>
+            <p className="text-3xl mb-3">{answeredCount} / {totalCount}名 回答済み</p>
             <p className="tabular-nums leading-relaxed">
               {formatDateTimeFull(event.issued_at)}<br />
               発報（{event.issuer ?? '自動発報'}）
@@ -120,14 +120,15 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
           <span className="tracking-[0.1em] uppercase mr-2">特記事項：</span>
           {event.comment ?? '—'}
         </p>
+
+        {/* 警告文（右下） */}
+        <div className="flex justify-end mt-3">
+          <p className="tracking-wide">※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}</p>
+        </div>
       </div>
 
       {/* 回答フォーム */}
       <div className="bg-white px-4 py-5 space-y-4">
-        {/* 警告文 */}
-        <p className={cn('text-xs font-bold text-right', isDrill ? 'text-amber-600' : 'text-red-600')}>
-          ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
-        </p>
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="event_id" value={event.event_id} />
 
