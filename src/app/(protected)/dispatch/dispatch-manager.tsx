@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useTransition, useEffect } from 'react'
+import { useActionState, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ConfirmModal } from '@/components/confirm-modal'
@@ -70,11 +70,6 @@ export function DispatchManager({
     if (modal === 'drill') drillAction(fd)
     else                   prodAction(fd)
   }
-
-  useEffect(() => {
-    fetchGasPreview()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   function fetchGasPreview() {
     startGasFetch(async () => {
@@ -156,11 +151,19 @@ export function DispatchManager({
           <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
         </div>
         {/* 照合ステータス行 */}
-        {(gasPending || preview === null) ? (
+        {gasPending ? (
           <div className="flex items-center gap-1.5 text-xs text-gray-400 px-0.5">
             <svg className="animate-spin w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/></svg>
             スプレッドシートと照合中…
           </div>
+        ) : preview === null ? (
+          <button
+            type="button"
+            onClick={fetchGasPreview}
+            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline px-0.5 transition-colors"
+          >
+            スプレッドシートから取得して照合する
+          </button>
         ) : preview.ok ? (
           preview.diff.length === 0 ? (
             <div className="flex items-center gap-1.5 text-xs text-emerald-600 px-0.5">
