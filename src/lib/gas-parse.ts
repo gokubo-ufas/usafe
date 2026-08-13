@@ -12,7 +12,8 @@ export type EmployeeRow = {
 // 退職FLG: 空欄=在籍(true)、●=退職(false)
 export function parseGasRows(rows: unknown[][]): EmployeeRow[] {
   const result: EmployeeRow[] = []
-  const seen = new Set<string>()
+  const seenNumbers = new Set<string>()
+  const seenEmails  = new Set<string>()
   for (const row of rows) {
     const employeeNumber = String(row[0] ?? '').trim()
     const name           = String(row[1] ?? '').trim()
@@ -21,8 +22,9 @@ export function parseGasRows(rows: unknown[][]): EmployeeRow[] {
     const retiredFlag    = String(row[4] ?? '').trim()
 
     if (!employeeNumber || !name || !email || !email.includes('@')) continue
-    if (seen.has(employeeNumber)) continue
-    seen.add(employeeNumber)
+    if (seenNumbers.has(employeeNumber) || seenEmails.has(email)) continue
+    seenNumbers.add(employeeNumber)
+    seenEmails.add(email)
 
     result.push({
       employee_number: employeeNumber,

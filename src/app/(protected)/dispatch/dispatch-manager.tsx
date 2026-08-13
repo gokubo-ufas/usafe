@@ -140,12 +140,16 @@ export function DispatchManager({
                 : '未取得'}
             </span>
           </button>
-          {syncResult && (
-            <p className={`text-xs text-center ${syncResult.ok ? 'text-emerald-600' : 'text-red-500'}`}>
-              {syncResult.ok
-                ? `✓ ${syncResult.received}名を登録（在籍中 ${syncResult.active}名）`
-                : syncResult.error}
+          {syncResult?.ok && (
+            <p className="text-xs text-center text-emerald-600">
+              ✓ {syncResult.received}名を登録（在籍中 {syncResult.active}名）
             </p>
+          )}
+          {syncResult && !syncResult.ok && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 space-y-0.5">
+              <p className="text-xs font-semibold text-amber-800">スプレッドシートとの同期に失敗しました</p>
+              <p className="text-xs text-amber-700">現在アプリに登録されている社員情報で発報できますが、発報先の内容を確認してから発報してください。</p>
+            </div>
           )}
         </div>
       </div>
