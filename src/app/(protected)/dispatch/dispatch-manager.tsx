@@ -175,7 +175,7 @@ export function DispatchManager({
         </div>
 
         {/* テーブルヘッダー */}
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+        <div className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
           <div className="flex items-center pr-3">
             <input
               type="checkbox"
@@ -184,10 +184,10 @@ export function DispatchManager({
               className="w-4 h-4 accent-emerald-600 cursor-pointer"
             />
           </div>
+          <span className="pr-3">在籍状況</span>
           <span>部署名</span>
           <span>社員番号</span>
           <span>氏名</span>
-          <span className="pl-3">在籍状況</span>
         </div>
 
         {/* 全社員（在籍中→退職済の順） */}
@@ -195,7 +195,7 @@ export function DispatchManager({
           {activeEmployees.map(emp => (
             <label
               key={emp.employee_number}
-              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
+              className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
             >
               <div className="flex items-center pr-3">
                 <input
@@ -205,34 +205,34 @@ export function DispatchManager({
                   className="w-4 h-4 accent-emerald-600"
                 />
               </div>
-              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
-              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
-              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
-              <div className="flex items-center pl-3">
+              <div className="flex items-center pr-3">
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
                   在籍中
                 </span>
               </div>
+              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
+              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
             </label>
           ))}
           {retiredEmployees.map(emp => (
             <div
               key={emp.employee_number}
-              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs"
+              className="grid grid-cols-[auto_auto_1fr_1fr_1fr] px-4 py-2.5 text-xs"
             >
               <div className="flex items-center pr-3">
                 <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold leading-none">
                   ✕
                 </span>
               </div>
-              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
-              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
-              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
-              <div className="flex items-center pl-3">
+              <div className="flex items-center pr-3">
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
                   退職済
                 </span>
               </div>
+              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
+              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
             </div>
           ))}
         </div>
