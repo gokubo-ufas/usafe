@@ -75,13 +75,13 @@ export async function postSlackAlert(
   if (params.type === 'test') {
     // ── 訓練発報 ──────────────────────────────────────────────
     blocks.push(
-      { type: 'header', text: { type: 'plain_text', text: '【U-Safe｜安否確認訓練】' } },
+      { type: 'header', text: { type: 'plain_text', text: '🟡 【U-Safe｜安否確認訓練】' } },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
           text: [
-            'これは安否確認訓練です。',
+            '*これは安否確認訓練です。*',
             '',
             'U-Safeで安否確認への回答をお願いします。',
             '',
@@ -101,18 +101,18 @@ export async function postSlackAlert(
     })
   } else {
     // ── 本番発報（手動 or 自動） ───────────────────────────────
-    const hasEqInfo = params.type === 'earthquake' &&
-      params.maxIntensity != null
+    const hasEqInfo = params.maxIntensity != null
 
     const leadText = hasEqInfo
       ? [
-          `最大震度${formatIntensity(params.maxIntensity!)}の地震が発生しました。`,
+          `最大震度 *${formatIntensity(params.maxIntensity!)}* の地震が発生しました。`,
           `震源地：${params.epicenter ?? '不明'}`,
         ].join('\n')
       : '安否確認が発報されました。'
 
     blocks.push(
-      { type: 'header', text: { type: 'plain_text', text: '【U-Safe｜安否確認】' } },
+      { type: 'header', text: { type: 'plain_text', text: '🔴 【U-Safe｜安否確認】' } },
+      { type: 'section', text: { type: 'mrkdwn', text: '🚨 *これは訓練ではありません*' } },
       {
         type: 'section',
         text: {
