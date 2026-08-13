@@ -170,7 +170,7 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
               <span className="text-[11px] text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
               <span className="text-[11px] text-gray-400 truncate">発報：{event.issuer ?? '自動発報'}</span>
             </div>
-            <span className="text-xs font-semibold text-gray-500 tabular-nums shrink-0">{answered}<span className="font-normal text-gray-400"> / {total}名</span></span>
+            <span className="text-sm font-bold text-gray-700 tabular-nums shrink-0">{answered}<span className="text-xs font-normal text-gray-400"> / {total}名</span></span>
           </div>
 
           {/* 震度＋震源地（大きめ） */}
