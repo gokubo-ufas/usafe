@@ -43,19 +43,21 @@ export async function submitResponse(_prev: State, formData: FormData): Promise<
     }
   }
 
-  const { error: insertError } = await admin.from('responses').insert({
-    event_id: eventId,
-    employee_number: employee.employee_number,
-    name: employee.name,
-    department: employee.department,
-    self_status: selfStatus,
-    family_status: familyStatus,
-    work_status: workStatus,
-    comment,
-  })
+  const { error: updateError } = await admin
+    .from('responses')
+    .update({
+      name: employee.name,
+      department: employee.department,
+      self_status: selfStatus,
+      family_status: familyStatus,
+      work_status: workStatus,
+      comment,
+    })
+    .eq('event_id', eventId)
+    .eq('employee_number', employee.employee_number)
 
-  if (insertError) {
-    console.error('[submitResponse]', insertError.message)
+  if (updateError) {
+    console.error('[submitResponse]', updateError.message)
     return { error: '送信に失敗しました。もう一度お試しください。' }
   }
 
