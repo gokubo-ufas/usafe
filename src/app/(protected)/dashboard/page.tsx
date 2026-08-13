@@ -147,61 +147,54 @@ function LatestEventPanel({
     <div className="border-y border-gray-100 overflow-hidden">
       {/* カラーブロック：全情報 */}
       <div className={cn('px-4 pt-4 pb-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-        {(() => {
-          const val   = isDrill ? 'text-amber-950' : 'text-white'
-          const muted = isDrill ? 'text-amber-900/65' : 'text-white/65'
-          return (
-            <>
-              {/* 震度（左）＋ 回答数・発報者/日時（右） */}
-              <div className="flex items-center justify-between gap-4 mb-4">
-                <div>
-                  {event.max_intensity != null ? (
-                    <>
-                      <p className={cn('text-[9px] font-bold tracking-[0.15em] uppercase mb-0.5', muted)}>最大震度</p>
-                      <p className={cn('font-black leading-none tracking-tighter', val)}
-                         style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
-                        {formatIntensity(event.max_intensity)}
-                      </p>
-                      {event.epicenter && (
-                        <p className={cn('text-xl font-bold mt-1.5', val)}>{event.epicenter}</p>
-                      )}
-                    </>
-                  ) : !event.comment ? (
-                    <p className={cn('text-lg font-bold', val)}>安否確認を行ってください</p>
-                  ) : null}
-                </div>
-                <div className="text-right shrink-0">
-                  {counts && (
-                    <div className={cn('mb-3', muted)}>
-                      <span className={cn('font-black text-2xl leading-none', val)}>{answered}</span>
-                      <span className="text-sm"> / {counts.total}名</span>
-                      <p className="text-[10px] mt-0.5">回答済み</p>
-                    </div>
-                  )}
-                  <div className={cn('text-[10px] space-y-0.5', muted)}>
-                    <p className={cn('font-semibold text-xs', val)}>{event.issuer ?? '自動'}</p>
-                    <p className="tabular-nums">{formatDateTimeFull(event.issued_at)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 特記事項 */}
-              {event.comment && (
-                <p className={cn('text-sm mb-4 leading-relaxed', val)}>
-                  <span className={cn('text-[9px] font-bold tracking-[0.1em] uppercase mr-1', muted)}>特記事項</span>
-                  {event.comment}
+        {/* 震度（左）＋ 回答数・発報情報（右） */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            {event.max_intensity != null ? (
+              <>
+                <p className="text-xs font-bold tracking-[0.15em] uppercase mb-0.5 text-white/65">最大震度</p>
+                <p className="font-black leading-none tracking-tighter text-white"
+                   style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
+                  {formatIntensity(event.max_intensity)}
                 </p>
-              )}
-
-              {/* 警告文（右下） */}
-              <div className="flex justify-end mt-1">
-                <p className={cn('text-sm font-bold tracking-wide', muted)}>
-                  ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
-                </p>
+                {event.epicenter && (
+                  <p className="text-xl font-bold mt-1.5 text-white">
+                    <span className="text-xs font-normal text-white/65 mr-1">震源地：</span>
+                    {event.epicenter}
+                  </p>
+                )}
+              </>
+            ) : !event.comment ? (
+              <p className="text-lg font-bold text-white">安否確認を行ってください</p>
+            ) : null}
+          </div>
+          <div className="text-right shrink-0">
+            {counts && (
+              <div className="mb-3 text-white/65">
+                <span className="font-black text-2xl leading-none text-white">{answered}</span>
+                <span className="text-sm"> / {counts.total}名</span>
+                <p className="text-[10px] mt-0.5">回答済み</p>
               </div>
-            </>
-          )
-        })()}
+            )}
+            <p className="text-white/65 text-[11px] tabular-nums leading-relaxed">
+              {formatDateTimeFull(event.issued_at)}<br />
+              発報（{event.issuer ?? '自動発報'}）
+            </p>
+          </div>
+        </div>
+
+        {/* 特記事項（常時表示） */}
+        <p className="text-sm mb-4 leading-relaxed text-white">
+          <span className="text-xs font-bold tracking-[0.1em] uppercase mr-2 text-white/65">特記事項</span>
+          {event.comment ?? '—'}
+        </p>
+
+        {/* 警告文（右下） */}
+        <div className="flex justify-end mt-1">
+          <p className="text-sm font-bold tracking-wide text-white/65">
+            ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
+          </p>
+        </div>
       </div>
 
       {/* あなたの回答 */}

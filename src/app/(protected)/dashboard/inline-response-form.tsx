@@ -80,50 +80,47 @@ export function InlineResponseForm({ event }: { event: Event }) {
   const [state, formAction, isPending] = useActionState(submitResponse, INIT)
   const isDrill = event.event_type === 'test'
 
-  const t = isDrill
-    ? { val: 'text-amber-950', muted: 'text-amber-900/65', border: 'border-amber-700/40' }
-    : { val: 'text-white',     muted: 'text-white/65',     border: 'border-white/35'     }
-
   return (
     <div>
       {/* カラーブロック：全情報 */}
       <div className={cn('px-4 pt-5 pb-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
 
-        {/* 中段：震度（左）＋ 発報者/日時（右） */}
-        <div className="flex items-center justify-between gap-4 mb-4">
+        {/* 震度（左）＋ 発報情報（右） */}
+        <div className="flex items-start justify-between gap-4 mb-4">
           <div>
             {event.max_intensity != null ? (
               <>
-                <p className={cn('text-[9px] font-bold tracking-[0.15em] uppercase mb-0.5', t.muted)}>最大震度</p>
-                <p className={cn('font-black leading-none tracking-tighter', t.val)}
+                <p className="text-xs font-bold tracking-[0.15em] uppercase mb-0.5 text-white/65">最大震度</p>
+                <p className="font-black leading-none tracking-tighter text-white"
                    style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
                   {formatIntensity(event.max_intensity)}
                 </p>
                 {event.epicenter && (
-                  <p className={cn('text-xl font-bold mt-1.5', t.val)}>{event.epicenter}</p>
+                  <p className="text-xl font-bold mt-1.5 text-white">
+                    <span className="text-xs font-normal text-white/65 mr-1">震源地：</span>
+                    {event.epicenter}
+                  </p>
                 )}
               </>
             ) : !event.comment ? (
-              <p className={cn('text-lg font-bold', t.val)}>安否確認を行ってください</p>
+              <p className="text-lg font-bold text-white">安否確認を行ってください</p>
             ) : null}
           </div>
-          <div className={cn('text-right text-[10px] shrink-0 space-y-0.5', t.muted)}>
-            <p className="font-semibold text-xs">{event.issuer ?? '自動'}</p>
-            <p className="tabular-nums">{formatDateTimeFull(event.issued_at)}</p>
-          </div>
+          <p className="text-white/65 text-[11px] tabular-nums text-right shrink-0 mt-1 leading-relaxed">
+            {formatDateTimeFull(event.issued_at)}<br />
+            発報（{event.issuer ?? '自動発報'}）
+          </p>
         </div>
 
-        {/* 特記事項（手動発報のコメント） */}
-        {event.comment && (
-          <p className={cn('text-sm mb-4 leading-relaxed', t.val)}>
-            <span className={cn('text-[9px] font-bold tracking-[0.1em] uppercase mr-1', t.muted)}>特記事項</span>
-            {event.comment}
-          </p>
-        )}
+        {/* 特記事項（常時表示） */}
+        <p className="text-sm mb-4 leading-relaxed text-white">
+          <span className="text-xs font-bold tracking-[0.1em] uppercase mr-2 text-white/65">特記事項</span>
+          {event.comment ?? '—'}
+        </p>
 
         {/* 警告文（右下） */}
         <div className="flex justify-end mt-1">
-          <p className={cn('text-sm font-bold tracking-wide', t.muted)}>
+          <p className="text-sm font-bold tracking-wide text-white/65">
             ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
           </p>
         </div>
