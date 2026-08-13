@@ -46,7 +46,7 @@ function RadioGroup({
         {options.map(({ value, label }) => (
           <label
             key={value}
-            className="flex-1 flex items-center justify-center text-center py-2.5 px-1 text-[11px] font-medium cursor-pointer leading-snug transition-colors text-gray-500 bg-white hover:bg-gray-50 has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:font-bold"
+            className="flex-1 flex items-center justify-center text-center py-2.5 px-1 text-[11px] font-medium cursor-pointer leading-snug transition-colors text-gray-500 bg-white hover:bg-gray-50 has-[:checked]:bg-gray-700 has-[:checked]:text-white has-[:checked]:font-bold"
           >
             <input
               type="radio"
