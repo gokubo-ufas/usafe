@@ -227,7 +227,7 @@ export function DispatchManager({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* テーブルヘッダー */}
-        <div className="grid grid-cols-[1rem_1fr_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
+        <div className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
           <input
             type="checkbox"
             checked={allActiveChecked}
@@ -235,7 +235,6 @@ export function DispatchManager({
             className="w-4 h-4 accent-emerald-600 cursor-pointer"
           />
           <span>部署名</span>
-          <span>社員番号</span>
           <span>氏名</span>
           <span>在籍状況</span>
         </div>
@@ -245,7 +244,7 @@ export function DispatchManager({
           {employees.map(emp => emp.is_active ? (
             <label
               key={emp.employee_number}
-              className="grid grid-cols-[1rem_1fr_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors items-center"
+              className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors items-center"
             >
               <input
                 type="checkbox"
@@ -254,7 +253,6 @@ export function DispatchManager({
                 className="w-4 h-4 accent-emerald-600"
               />
               <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
-              <span className="text-gray-800 tabular-nums">{emp.employee_number}</span>
               <span className="font-medium text-gray-800 truncate">{emp.name}</span>
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">
                 在籍中
@@ -263,13 +261,12 @@ export function DispatchManager({
           ) : (
             <div
               key={emp.employee_number}
-              className="grid grid-cols-[1rem_1fr_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
+              className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
             >
               <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">
                 ✕
               </span>
               <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
-              <span className="text-gray-800 tabular-nums">{emp.employee_number}</span>
               <span className="font-medium text-gray-800 truncate">{emp.name}</span>
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap text-center">
                 退職済
