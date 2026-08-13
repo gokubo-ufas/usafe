@@ -124,36 +124,38 @@ export function DispatchManager({
       {/* ── 社員情報取得 ── */}
       <div className="space-y-2">
         <h2 className="text-base font-bold text-gray-900">社員情報取得</h2>
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
-            <span>
+        <div className="space-y-1.5">
+          <button
+            type="button"
+            onClick={fetchAndSync}
+            disabled={syncPending}
+            className="w-full flex flex-col items-center justify-center gap-0.5 py-3 px-4 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-40"
+          >
+            <span className="text-sm font-semibold text-emerald-700">
+              {syncPending ? '取得中…' : '社員SpreadSheetを取得し最新化'}
+            </span>
+            <span className="text-[11px] text-emerald-500">
               {lastUpdatedAt
                 ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
                 : '未取得'}
             </span>
-            <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
-          </div>
-          <div className="flex items-center gap-3 px-0.5">
-            <button
-              type="button"
-              onClick={fetchAndSync}
-              disabled={syncPending}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline transition-colors disabled:opacity-40"
-            >
-              {syncPending ? '取得中…' : '社員情報を取得し最新化'}
-            </button>
-            {syncResult && (
-              syncResult.ok
-                ? <span className="text-xs text-emerald-600">✓ {syncResult.received}名を登録（在籍中 {syncResult.active}名）</span>
-                : <span className="text-xs text-red-500">{syncResult.error}</span>
-            )}
-          </div>
+          </button>
+          {syncResult && (
+            <p className={`text-xs text-center ${syncResult.ok ? 'text-emerald-600' : 'text-red-500'}`}>
+              {syncResult.ok
+                ? `✓ ${syncResult.received}名を登録（在籍中 ${syncResult.active}名）`
+                : syncResult.error}
+            </p>
+          )}
         </div>
       </div>
 
       {/* ── 対象選択 ── */}
       <div className="space-y-2">
-        <h2 className="text-base font-bold text-gray-900">対象選択</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-gray-900">対象選択</h2>
+          <span className="text-[11px] text-gray-400">合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
+        </div>
         <div className="flex items-center justify-between px-0.5">
           <button
             type="button"
