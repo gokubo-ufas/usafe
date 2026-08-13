@@ -1,6 +1,14 @@
 import type { Event } from '@/types'
 import { formatDateTime, getDisplayEventType, DISPLAY_EVENT_TYPE_CONFIG } from '@/lib/utils'
 
+const INTENSITY_MAP: Record<number, string> = {
+  10: '1', 20: '2', 30: '3', 40: '4',
+  45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7',
+}
+function formatIntensity(n: number): string {
+  return INTENSITY_MAP[n] ?? String(n)
+}
+
 type Props = {
   event: Event
   answeredCount: number
@@ -52,7 +60,7 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
             {event.max_intensity !== null && (
               <div className="flex items-baseline gap-1.5 text-sm">
                 <span className="text-xs text-gray-400">最大震度</span>
-                <span className="font-bold text-gray-900">震度 {event.max_intensity}</span>
+                <span className="font-bold text-gray-900">震度{formatIntensity(event.max_intensity)}</span>
               </div>
             )}
             {event.epicenter !== null && (

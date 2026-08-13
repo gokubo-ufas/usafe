@@ -39,14 +39,14 @@ function RadioGroup({
 }) {
   return (
     <fieldset>
-      <legend className="text-sm font-semibold text-gray-700 mb-2">
+      <legend className="text-sm font-semibold text-gray-700 mb-1.5">
         {legend}<span className="text-red-500 ml-1">*</span>
       </legend>
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-1">
         {options.map(({ value, label }) => (
           <label
             key={value}
-            className="flex items-center gap-3 cursor-pointer rounded-xl border-2 border-gray-200 px-3 py-2.5 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
+            className="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-gray-200 px-2.5 py-1.5 hover:border-emerald-300 hover:bg-emerald-50/40 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 transition-colors"
           >
             <input
               type="radio"
@@ -54,9 +54,9 @@ function RadioGroup({
               value={value}
               required
               defaultChecked={defaultValue === value}
-              className="w-4 h-4 accent-emerald-700 shrink-0"
+              className="w-3.5 h-3.5 accent-emerald-700 shrink-0"
             />
-            <span className="text-sm font-medium text-gray-900">{label}</span>
+            <span className="text-xs font-medium text-gray-900 leading-tight">{label}</span>
           </label>
         ))}
       </div>
@@ -103,7 +103,7 @@ function ModalForm({
         </div>
 
         {/* フォーム本体 */}
-        <form action={formAction} className="overflow-y-auto flex-1 px-5 py-4 space-y-5">
+        <form action={formAction} className="overflow-y-auto flex-1 px-5 py-3 space-y-4">
           <input type="hidden" name="event_id" value={eventId} />
 
           <RadioGroup

@@ -3,7 +3,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { postSlackAlert } from '@/lib/slack'
 
 const P2P_API_URL = 'https://api.p2pquake.net/v2/history?codes=551&limit=10'
-const MIN_SCALE = 40 // 震度4以上で自動発報
 
 type P2PQuakeEvent = {
   id: string
@@ -38,10 +37,8 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: 'fetch_failed', detail }, { status: 500 })
   }
 
-  // 閾値以上の地震イベントだけ処理
-  const qualifying = quakes.filter(
-    (q) => q.code === 551 && (q.earthquake?.maxScale ?? -1) >= MIN_SCALE,
-  )
+  // code=551（地震情報）かつ earthquake データがあるものを処理（閾値なし）
+  const qualifying = quakes.filter((q) => q.code === 551 && q.earthquake != null)
 
   if (qualifying.length === 0) {
     return Response.json({ dispatched: 0, reason: 'no_qualifying_events' })
