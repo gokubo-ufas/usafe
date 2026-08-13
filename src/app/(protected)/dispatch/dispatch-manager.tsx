@@ -113,26 +113,26 @@ export function DispatchManager({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* ヘッダー */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-          <div>
+        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+          <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
-            {lastUpdatedAt && (
-              <p className="text-[10px] text-gray-400 mt-0.5">
-                最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-                  timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
-                  day: '2-digit', hour: '2-digit', minute: '2-digit',
-                })}　在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名
-              </p>
-            )}
+            <button
+              type="button"
+              onClick={fetchGasPreview}
+              disabled={gasPending}
+              className="text-xs font-medium text-sky-600 hover:text-sky-700 disabled:opacity-40 transition-colors"
+            >
+              {gasPending ? '取得中…' : 'スプシから更新'}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={fetchGasPreview}
-            disabled={gasPending}
-            className="text-xs font-medium text-sky-600 hover:text-sky-700 disabled:opacity-40 transition-colors"
-          >
-            {gasPending ? '取得中…' : 'スプシから更新'}
-          </button>
+          {lastUpdatedAt && (
+            <p className="text-[10px] text-gray-400 mt-1">
+              最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
+                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
+                day: '2-digit', hour: '2-digit', minute: '2-digit',
+              })}　在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名
+            </p>
+          )}
         </div>
 
         {/* GAS同期差分 */}
