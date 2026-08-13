@@ -17,6 +17,32 @@ export type PreviewResult =
   | { ok: true;  current: EmployeeRow[]; incoming: EmployeeRow[]; diff: DiffEntry[] }
   | { ok: false; error: string }
 
+// GASから返ってくる生の2次元配列（A〜E列）をEmployeeRowに変換する。
+// 列順: [社員番号, 氏名, メール, 部門, 退職FLG]
+// 空行・メールに@なし行（ヘッダー等）はスキップ。
+// 退職FLG: 空欄=在籍(true)、●=退職(false)
+function parseGasRows(rows: unknown[][]): EmployeeRow[] {
+  const result: EmployeeRow[] = []
+  for (const row of rows) {
+    const employeeNumber = String(row[0] ?? '').trim()
+    const name           = String(row[1] ?? '').trim()
+    const email          = String(row[2] ?? '').trim().toLowerCase()
+    const department     = String(row[3] ?? '').trim() || null
+    const retiredFlag    = String(row[4] ?? '').trim()
+
+    if (!employeeNumber || !name || !email || !email.includes('@')) continue
+
+    result.push({
+      employee_number: employeeNumber,
+      name,
+      email,
+      department,
+      is_active: retiredFlag !== '●',
+    })
+  }
+  return result
+}
+
 export async function GET(): Promise<Response> {
   const gasUrl = process.env.GAS_WEBAPP_URL
   if (!gasUrl) {
@@ -30,7 +56,8 @@ export async function GET(): Promise<Response> {
     const res = await fetch(gasUrl, { signal: controller.signal, cache: 'no-store', redirect: 'follow' })
     clearTimeout(id)
     if (!res.ok) throw new Error(`GAS returned ${res.status}: ${await res.text().then(t => t.slice(0, 200))}`)
-    incoming = (await res.json()) as EmployeeRow[]
+    const raw = (await res.json()) as unknown[][]
+    incoming = parseGasRows(raw)
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err)
     console.error('[preview] GAS fetch error:', detail)

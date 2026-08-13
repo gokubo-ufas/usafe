@@ -228,11 +228,8 @@ function _doSync() {
 
 // ── GAS Web App エンドポイント（GET） ────────────────────────────
 // U-Safe の /api/employees/preview から呼ばれる。
-// 社員マスタを JSON 配列で返す。
+// 3行目以降のA〜E列をそのまま2次元配列で返す。解釈はU-Safe側で行う。
 
-/**
- * 退職FLG：空欄 → is_active: true（在籍）、● → is_active: false（退職）
- */
 function doGet(e) {
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
@@ -252,42 +249,8 @@ function doGet(e) {
     var numRows = lastRow - DATA_START_ROW + 1;
     var data    = sheet.getRange(DATA_START_ROW, 1, numRows, NUM_COLS).getValues();
 
-    var employees = [];
-
-    for (var i = 0; i < data.length; i++) {
-      var row = data[i];
-
-      // 完全空行スキップ
-      var allEmpty = true;
-      for (var c = 0; c < NUM_COLS; c++) {
-        if (String(row[c]).trim() !== '') { allEmpty = false; break; }
-      }
-      if (allEmpty) continue;
-
-      var empNumber = String(row[COL.employee_number] || '').trim();
-      var name      = String(row[COL.name]            || '').trim();
-      var email     = String(row[COL.email]           || '').trim().toLowerCase();
-
-      // 必須項目が欠けている行・ヘッダー行（メールに@なし）はスキップ
-      if (!empNumber || !name || !email || email.indexOf('@') === -1) continue;
-
-      // 退職FLG判定
-      // 空欄 → 在籍（is_active: true）
-      // ●   → 退職（is_active: false）
-      var retiredFlagStr = String(row[COL.retired_flag]).trim();
-      var isActive = (retiredFlagStr !== '●');
-
-      employees.push({
-        employee_number: empNumber,
-        name:            name,
-        email:           email,
-        department:      String(row[COL.department] || '').trim() || null,
-        is_active:       isActive,
-      });
-    }
-
     return ContentService
-      .createTextOutput(JSON.stringify(employees))
+      .createTextOutput(JSON.stringify(data))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
