@@ -4,9 +4,9 @@ import { useActionState, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ConfirmModal } from '@/components/confirm-modal'
-import { dispatchDrill, dispatchProduction, applySyncFromGAS } from './actions'
+import { dispatchDrill, dispatchProduction, fetchAndSyncFromGAS } from './actions'
 import { cn } from '@/lib/cn'
-import type { DiffEntry, PreviewResult } from '@/app/api/employees/preview/route'
+import type { SyncResult } from './actions'
 
 type Mode = 'drill' | 'production'
 type DispatchState = { error?: string; success?: string; slackFailed?: boolean }
@@ -27,7 +27,7 @@ export function DispatchManager({
   employees: Employee[]
   lastUpdatedAt: string | null
 }) {
-  const activeEmployees = employees.filter(e => e.is_active)
+  const activeEmployees  = employees.filter(e => e.is_active)
   const retiredEmployees = employees.filter(e => !e.is_active)
 
   const [checked, setChecked] = useState<Set<string>>(
@@ -43,10 +43,8 @@ export function DispatchManager({
 
   const router = useRouter()
 
-  const [preview,     setPreview]    = useState<PreviewResult | null>(null)
-  const [gasPending,  startGasFetch] = useTransition()
-  const [syncPending, startSync]     = useTransition()
-  const [syncResult,  setSyncResult] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [syncPending, startSync] = useTransition()
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null)
 
   const allActiveChecked = activeEmployees.length > 0 && checked.size === activeEmployees.length
 
@@ -71,27 +69,12 @@ export function DispatchManager({
     else                   prodAction(fd)
   }
 
-  function fetchGasPreview() {
-    startGasFetch(async () => {
-      setSyncResult(null)
-      const res  = await fetch('/api/employees/preview')
-      const data = (await res.json()) as PreviewResult
-      setPreview(data)
-    })
-  }
-
-  function applySync() {
-    if (!preview || !preview.ok) return
+  function fetchAndSync() {
+    setSyncResult(null)
     startSync(async () => {
-      const result = await applySyncFromGAS(preview.incoming)
-      if (result.ok) {
-        setPreview(null)
-        setSyncResult(null)
-        router.refresh()
-        fetchGasPreview()
-      } else {
-        setSyncResult(result)
-      }
+      const result = await fetchAndSyncFromGAS()
+      setSyncResult(result)
+      if (result.ok) router.refresh()
     })
   }
 
@@ -120,95 +103,52 @@ export function DispatchManager({
 
       {/* ── 発報 ── */}
       <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setModal('drill')}
-            disabled={checked.size === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
-          >
-            🟡 訓練発報
-          </button>
-          <button
-            type="button"
-            onClick={() => setModal('production')}
-            disabled={checked.size === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
-          >
-            🔴 本番発報
-          </button>
+        <button
+          type="button"
+          onClick={() => setModal('drill')}
+          disabled={checked.size === 0}
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
+        >
+          🟡 訓練発報
+        </button>
+        <button
+          type="button"
+          onClick={() => setModal('production')}
+          disabled={checked.size === 0}
+          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
+        >
+          🔴 本番発報
+        </button>
       </div>
 
       {/* ── 社員情報取得 ── */}
       <div className="space-y-2">
-      <h2 className="text-base font-bold text-gray-900">社員情報取得</h2>
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
-          <span>
-            {lastUpdatedAt
-              ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
-              : '未取得'}
-          </span>
-          <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
-        </div>
-        {/* 照合ステータス行 */}
-        {gasPending ? (
-          <div className="flex items-center gap-1.5 text-xs text-gray-400 px-0.5">
-            <svg className="animate-spin w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/></svg>
-            スプレッドシートと照合中…
+        <h2 className="text-base font-bold text-gray-900">社員情報取得</h2>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
+            <span>
+              {lastUpdatedAt
+                ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+                : '未取得'}
+            </span>
+            <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
           </div>
-        ) : preview === null ? (
-          <button
-            type="button"
-            onClick={fetchGasPreview}
-            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline px-0.5 transition-colors"
-          >
-            スプレッドシートから取得して照合する
-          </button>
-        ) : preview.ok ? (
-          preview.diff.length === 0 ? (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 px-0.5">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd"/></svg>
-              スプレッドシートと一致しています
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-0.5">
-                <div className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 shrink-0"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd"/></svg>
-                  {preview.diff.length}件の変更があります
-                </div>
-                <button
-                  type="button"
-                  onClick={applySync}
-                  disabled={syncPending}
-                  className="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  {syncPending ? '取得中…' : '取得して最新化'}
-                </button>
-              </div>
-              {syncResult?.error && <p className="text-xs text-red-500 px-0.5">{syncResult.error}</p>}
-              <div className="rounded-xl border border-amber-100 overflow-hidden divide-y divide-amber-50 max-h-40 overflow-y-auto">
-                {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
-              </div>
-            </div>
-          )
-        ) : (
-          <div className="flex items-start justify-between gap-3 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
-            <div className="flex items-start gap-1.5 text-xs text-red-600">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 mt-0.5 shrink-0"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd"/></svg>
-              <span>スプレッドシートの取得に失敗しました。アプリ内の社員情報から発報できますが、発報先を確認してから発報してください。</span>
-            </div>
+          <div className="flex items-center gap-3 px-0.5">
             <button
               type="button"
-              onClick={fetchGasPreview}
-              disabled={gasPending}
-              className="text-xs font-semibold text-red-600 hover:text-red-700 underline shrink-0 transition-colors"
+              onClick={fetchAndSync}
+              disabled={syncPending}
+              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 underline transition-colors disabled:opacity-40"
             >
-              再取得
+              {syncPending ? '取得中…' : '社員情報を取得し最新化'}
             </button>
+            {syncResult && (
+              syncResult.ok
+                ? <span className="text-xs text-emerald-600">✓ {syncResult.received}名を登録（在籍中 {syncResult.active}名）</span>
+                : <span className="text-xs text-red-500">{syncResult.error}</span>
+            )}
           </div>
-        )}
-      </div>
+        </div>
       </div>
 
       {/* ── 対象選択 ── */}
@@ -224,58 +164,58 @@ export function DispatchManager({
           </button>
           <span className="text-sm text-gray-500">{checked.size}名を選択中</span>
         </div>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* テーブルヘッダー */}
-        <div className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
-          <input
-            type="checkbox"
-            checked={allActiveChecked}
-            onChange={toggleAll}
-            className="w-4 h-4 accent-emerald-600 cursor-pointer"
-          />
-          <span>部署名</span>
-          <span>氏名</span>
-          <span>在籍状況</span>
+          {/* テーブルヘッダー */}
+          <div className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
+            <input
+              type="checkbox"
+              checked={allActiveChecked}
+              onChange={toggleAll}
+              className="w-4 h-4 accent-emerald-600 cursor-pointer"
+            />
+            <span>部署名</span>
+            <span>氏名</span>
+            <span>在籍状況</span>
+          </div>
+
+          {/* 全社員 */}
+          <div className="divide-y divide-gray-100/80">
+            {employees.map(emp => emp.is_active ? (
+              <label
+                key={emp.employee_number}
+                className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors items-center"
+              >
+                <input
+                  type="checkbox"
+                  checked={checked.has(emp.employee_number)}
+                  onChange={() => toggleOne(emp.employee_number)}
+                  className="w-4 h-4 accent-emerald-600"
+                />
+                <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
+                <span className="font-medium text-gray-800 truncate">{emp.name}</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">
+                  在籍中
+                </span>
+              </label>
+            ) : (
+              <div
+                key={emp.employee_number}
+                className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
+              >
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">
+                  ✕
+                </span>
+                <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
+                <span className="font-medium text-gray-800 truncate">{emp.name}</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap text-center">
+                  退職済
+                </span>
+              </div>
+            ))}
+          </div>
+
         </div>
-
-        {/* 全社員 */}
-        <div className="divide-y divide-gray-100/80">
-          {employees.map(emp => emp.is_active ? (
-            <label
-              key={emp.employee_number}
-              className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors items-center"
-            >
-              <input
-                type="checkbox"
-                checked={checked.has(emp.employee_number)}
-                onChange={() => toggleOne(emp.employee_number)}
-                className="w-4 h-4 accent-emerald-600"
-              />
-              <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
-              <span className="font-medium text-gray-800 truncate">{emp.name}</span>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">
-                在籍中
-              </span>
-            </label>
-          ) : (
-            <div
-              key={emp.employee_number}
-              className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
-            >
-              <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">
-                ✕
-              </span>
-              <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
-              <span className="font-medium text-gray-800 truncate">{emp.name}</span>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap text-center">
-                退職済
-              </span>
-            </div>
-          ))}
-        </div>
-
-      </div>
       </div>
 
       {/* 発報モーダル */}
@@ -289,33 +229,6 @@ export function DispatchManager({
           onConfirm={handleDispatchConfirm}
         />
       )}
-    </div>
-  )
-}
-
-// ── 差分行 ──────────────────────────────────────
-
-function DiffRow({ entry }: { entry: DiffEntry }) {
-  if (entry.kind === 'added') {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-xs">
-        <span className="shrink-0 font-semibold text-emerald-600 w-10">追加</span>
-        <span className="text-gray-700">{entry.row.name}（{entry.row.employee_number}）</span>
-      </div>
-    )
-  }
-  if (entry.kind === 'deactivated') {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-red-50 text-xs">
-        <span className="shrink-0 font-semibold text-red-600 w-10">退職</span>
-        <span className="text-gray-700">{entry.row.name}（{entry.row.employee_number}）</span>
-      </div>
-    )
-  }
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 text-xs">
-      <span className="shrink-0 font-semibold text-amber-600 w-10">変更</span>
-      <span className="text-gray-700">{entry.after.name}（{entry.after.employee_number}）</span>
     </div>
   )
 }
