@@ -12,14 +12,6 @@ export function getDisplayEventType(
   return event.earthquake_info_id === null ? 'manual' : 'earthquake'
 }
 
-export const DISPLAY_EVENT_TYPE_CONFIG: Record<
-  DisplayEventType,
-  { label: string; className: string }
-> = {
-  test:       { label: '🟡 訓練', className: 'bg-amber-400 text-amber-950' },
-  manual:     { label: '🔴 本番', className: 'bg-red-500 text-white'       },
-  earthquake: { label: '🔴 本番', className: 'bg-red-500 text-white'       },
-}
 
 export function getStatusGroup(response: Response | null): StatusGroup {
   if (!response || response.self_status === null) return 'unanswered'
@@ -37,16 +29,6 @@ export function getStatusGroup(response: Response | null): StatusGroup {
   return 'unanswered'
 }
 
-export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export function formatDateTimeFull(iso: string): string {
   return new Date(iso).toLocaleString('ja-JP', {
     timeZone: 'Asia/Tokyo',
@@ -57,10 +39,6 @@ export function formatDateTimeFull(iso: string): string {
     minute: '2-digit',
     second: '2-digit',
   })
-}
-
-export function isWithin24Hours(iso: string): boolean {
-  return Date.now() - new Date(iso).getTime() < 24 * 60 * 60 * 1000
 }
 
 export const SELF_STATUS_LABELS: Record<string, string> = {

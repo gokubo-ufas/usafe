@@ -2,29 +2,10 @@
 
 import { useState, type ReactNode } from 'react'
 import type { EmployeeWithStatus, Response } from '@/types'
-import { STATUS_GROUP_CONFIG } from '@/lib/utils'
+import { SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 
 const GROUP_ORDER = ['critical', 'checking', 'unanswered', 'safe'] as const
-
-const SELF_LABEL: Record<string, string> = {
-  safe:        '無事',
-  injured:     '負傷',
-  need_rescue: '救助必要',
-}
-
-const FAMILY_LABEL: Record<string, string> = {
-  safe:           '無事',
-  injured:        '負傷',
-  need_rescue:    '救助必要',
-  checking:       '確認中',
-  not_applicable: '確認不要',
-}
-
-const WORK_LABEL: Record<string, string> = {
-  available:   '対応可能',
-  unavailable: '対応困難',
-}
 
 const SUMMARY_CONFIG = {
   critical: {
@@ -92,9 +73,9 @@ function EmployeeGrid({ members }: { members: EmployeeWithStatus[] }) {
         const r: Response | null = emp.latestResponse
         const answered = r && r.self_status !== null
 
-        const selfVal   = r?.self_status   ? (SELF_LABEL[r.self_status]     ?? r.self_status)   : '—'
-        const familyVal = r?.family_status ? (FAMILY_LABEL[r.family_status] ?? r.family_status) : '—'
-        const workVal   = r?.work_status   ? (WORK_LABEL[r.work_status]     ?? r.work_status)   : '—'
+        const selfVal   = r?.self_status   ? (SELF_STATUS_LABELS[r.self_status]     ?? r.self_status)   : '—'
+        const familyVal = r?.family_status ? (FAMILY_STATUS_LABELS[r.family_status] ?? r.family_status) : '—'
+        const workVal   = r?.work_status   ? (WORK_STATUS_LABELS[r.work_status]     ?? r.work_status)   : '—'
 
         return (
           <div key={emp.employee_number} className="px-4 py-2.5 space-y-1">
@@ -131,7 +112,6 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
 
   const groups = GROUP_ORDER.map((key) => ({
     key,
-    config: STATUS_GROUP_CONFIG[key],
     summary: SUMMARY_CONFIG[key],
     members: deptFiltered.filter((e) => e.statusGroup === key),
     total:   employees.filter((e) => e.statusGroup === key).length,
@@ -189,10 +169,10 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
         <p className="text-sm text-gray-400 text-center py-8">該当する社員がいません</p>
       ) : (
         <div className="space-y-px">
-          {visibleGroups.map(({ key, config, summary, members }) => (
+          {visibleGroups.map(({ key, summary, members }) => (
             <div key={key} className="bg-white border-y border-gray-100 overflow-hidden">
               <div className={cn('flex items-center gap-2.5 px-4 py-2.5 border-l-4', summary.headerBg, summary.accentBorder)}>
-                <h3 className={cn('text-sm font-bold tracking-tight shrink-0', summary.fg)}>{config.label}</h3>
+                <h3 className={cn('text-sm font-bold tracking-tight shrink-0', summary.fg)}>{summary.label}</h3>
                 <span className={cn('text-xs px-2.5 py-0.5 font-semibold shrink-0', summary.badgeClass)}>{members.length}名</span>
                 <p className="text-[10px] text-gray-400 truncate flex-1 text-right">{summary.description}</p>
               </div>

@@ -2,82 +2,11 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitResponse } from '@/app/(protected)/dashboard/actions'
+import { RadioGroup, SELF_OPTIONS, FAMILY_ROWS, WORK_OPTIONS } from '@/components/radio-group'
 import type { Response } from '@/types'
 
 type State = { error?: string }
 const INIT: State = {}
-
-const SELF_OPTIONS = [
-  { value: 'safe',        label: '無事' },
-  { value: 'injured',     label: '負傷' },
-  { value: 'need_rescue', label: '救助必要' },
-]
-
-const FAMILY_ROWS = [
-  [
-    { value: 'safe',        label: '無事' },
-    { value: 'injured',     label: '負傷' },
-    { value: 'need_rescue', label: '救助必要' },
-  ],
-  [
-    { value: 'not_applicable', label: '確認不要' },
-    { value: 'checking',       label: '確認中' },
-  ],
-]
-
-const WORK_OPTIONS = [
-  { value: 'available',   label: '対応可能' },
-  { value: 'unavailable', label: '対応困難' },
-]
-
-const LABEL_CLASS = 'flex-1 flex items-center justify-center text-center py-5 px-1 text-xs font-medium cursor-pointer leading-snug transition-colors text-gray-500 bg-white hover:bg-gray-50 has-[:checked]:bg-gray-700 has-[:checked]:text-white has-[:checked]:font-bold'
-
-function RadioGroup({
-  name,
-  legend,
-  options,
-  rows,
-  defaultValue,
-}: {
-  name: string
-  legend: string
-  options?: { value: string; label: string }[]
-  rows?: { value: string; label: string }[][]
-  defaultValue?: string | null
-}) {
-  const renderRow = (row: { value: string; label: string }[]) =>
-    row.map(({ value, label }) => (
-      <label key={value} className={LABEL_CLASS}>
-        <input
-          type="radio"
-          name={name}
-          value={value}
-          required
-          defaultChecked={defaultValue === value}
-          className="sr-only"
-        />
-        {label}
-      </label>
-    ))
-
-  return (
-    <fieldset>
-      <legend className="text-sm font-semibold text-gray-700 mb-1.5">
-        {legend}<span className="text-red-500 ml-1">*</span>
-      </legend>
-      <div className="border border-gray-200">
-        {rows
-          ? rows.map((row, i) => (
-              <div key={i} className={`flex divide-x divide-gray-200${i > 0 ? ' border-t border-gray-200' : ''}`}>
-                {renderRow(row)}
-              </div>
-            ))
-          : <div className="flex divide-x divide-gray-200">{renderRow(options ?? [])}</div>
-        }
-      </div>
-    </fieldset>
-  )
-}
 
 function ModalForm({
   eventId,
@@ -107,7 +36,7 @@ function ModalForm({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-none text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label="閉じる"
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -118,9 +47,9 @@ function ModalForm({
 
         <form action={formAction} className="overflow-y-auto flex-1 px-5 py-3 space-y-4">
           <input type="hidden" name="event_id" value={eventId} />
-          <RadioGroup name="self_status"   legend="本人の状況" options={SELF_OPTIONS} defaultValue={current?.self_status}   />
-          <RadioGroup name="family_status" legend="家族の状況" rows={FAMILY_ROWS}   defaultValue={current?.family_status} />
-          <RadioGroup name="work_status"   legend="業務対応"   options={WORK_OPTIONS} defaultValue={current?.work_status}   />
+          <RadioGroup name="self_status"   legend="本人の状況" options={SELF_OPTIONS} defaultValue={current?.self_status} />
+          <RadioGroup name="family_status" legend="家族の状況" rows={FAMILY_ROWS}     defaultValue={current?.family_status} />
+          <RadioGroup name="work_status"   legend="業務対応"   options={WORK_OPTIONS} defaultValue={current?.work_status} />
 
           <div>
             <label htmlFor="resp-comment" className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -145,11 +74,11 @@ function ModalForm({
 
           <div className="flex gap-3 pb-1">
             <button type="button" onClick={onClose} disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-none hover:bg-gray-200 disabled:opacity-50 transition-colors">
+              className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors">
               キャンセル
             </button>
             <button type="submit" disabled={isPending}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 rounded-none hover:bg-emerald-800 disabled:opacity-50 transition-colors">
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 transition-colors">
               {isPending ? '送信中…' : '送信する'}
             </button>
           </div>
@@ -174,7 +103,7 @@ export function ResponseForm({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full py-2.5 bg-emerald-700 text-white text-sm font-semibold rounded-none hover:bg-emerald-800 transition-colors"
+        className="w-full py-2.5 bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 transition-colors"
       >
         {hasAnswered ? '回答を更新する' : '安否を報告する'}
       </button>
