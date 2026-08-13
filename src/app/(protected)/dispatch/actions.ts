@@ -53,8 +53,8 @@ export async function fetchAndSyncFromGAS(): Promise<SyncResult> {
   const admin = createAdminClient()
   const { data, error } = await admin.rpc('sync_employees_from_gas', { p_employees: employees })
   if (error) {
-    console.error('[fetchAndSyncFromGAS] RPC error:', error.message)
-    return { ok: false, error: '登録に失敗しました。もう一度お試しください。' }
+    console.error('[fetchAndSyncFromGAS] RPC error:', error.message, error.details, error.hint)
+    return { ok: false, error: `登録に失敗しました：${error.message}` }
   }
 
   return { ok: true, received: data.received, active: data.active }
