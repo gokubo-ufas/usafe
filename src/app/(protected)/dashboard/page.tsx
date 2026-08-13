@@ -177,10 +177,10 @@ export default async function DashboardPage() {
 type CardEvent = Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id' | 'max_intensity' | 'epicenter'>
 
 const STATUS_ITEMS = [
-  { key: 'safe'      as const, label: '無事'   },
   { key: 'critical'  as const, label: '要対応' },
   { key: 'checking'  as const, label: '確認中' },
   { key: 'unanswered'as const, label: '未回答' },
+  { key: 'safe'      as const, label: '無事'   },
 ]
 
 function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }) {
@@ -207,17 +207,21 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
             <span className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
           </div>
 
-          {/* 震度・震源地 or コメント */}
+          {/* 1行目：震度＋震源地 */}
           {event.max_intensity != null ? (
-            <p className="text-sm font-bold text-gray-800 mb-2">
+            <p className="text-sm font-bold text-gray-800 mb-0.5">
               震度{formatIntensity(event.max_intensity)}
               {event.epicenter && <span className="font-normal text-gray-500 ml-2">{event.epicenter}</span>}
             </p>
-          ) : event.comment ? (
-            <p className="text-sm text-gray-600 truncate mb-2">{event.comment}</p>
           ) : (
-            <div className="mb-2" />
+            <div className="mb-0.5" />
           )}
+
+          {/* 2行目：特記事項 */}
+          <p className="text-xs text-gray-500 truncate mb-2">
+            <span className="text-gray-400 mr-1">特記事項</span>
+            {event.comment ?? '—'}
+          </p>
 
           {/* ステータス（4区分・常時表示） */}
           <div className="grid grid-cols-4 gap-1">
