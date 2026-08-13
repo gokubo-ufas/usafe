@@ -22,13 +22,19 @@ export default async function EventDetailPage({
 
   if (!event) notFound()
 
-  const { data: allResponses } = await admin
-    .from('responses')
-    .select('*')
-    .eq('event_id', id)
-    .order('created_at', { ascending: false })
+  const [{ data: allResponses }, { data: allEmployees }] = await Promise.all([
+    admin
+      .from('responses')
+      .select('*')
+      .eq('event_id', id)
+      .order('created_at', { ascending: false }),
+    admin
+      .from('employees')
+      .select('employee_number, name, email, department'),
+  ])
 
   const responses = (allResponses ?? []) as Response[]
+  const employeeMap = new Map((allEmployees ?? []).map((e) => [e.employee_number, e]))
 
   // responses をベースに最新1件/社員を確定（発報当時の対象者が基準）
   const latestByEmployee = new Map<string, Response>()
@@ -42,14 +48,17 @@ export default async function EventDetailPage({
   const answeredCount = [...latestByEmployee.values()].filter((r) => r.self_status !== null).length
 
   const employeesWithStatus: EmployeeWithStatus[] = [...latestByEmployee.entries()]
-    .map(([empNum, latestResponse]) => ({
-      employee_number: empNum,
-      name:       latestResponse.name       ?? empNum,
-      email:      '',
-      department: latestResponse.department ?? null,
-      latestResponse,
-      statusGroup: getStatusGroup(latestResponse),
-    }))
+    .map(([empNum, latestResponse]) => {
+      const emp = employeeMap.get(empNum)
+      return {
+        employee_number: empNum,
+        name:       latestResponse.name       ?? emp?.name       ?? '',
+        email:      emp?.email ?? '',
+        department: latestResponse.department ?? emp?.department ?? null,
+        latestResponse,
+        statusGroup: getStatusGroup(latestResponse),
+      }
+    })
     .sort((a, b) =>
       new Date(b.latestResponse!.created_at).getTime() -
       new Date(a.latestResponse!.created_at).getTime()
