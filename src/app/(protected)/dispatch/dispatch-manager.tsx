@@ -109,126 +109,6 @@ export function DispatchManager({
   return (
     <div className="space-y-4">
 
-      {/* ── 社員一覧 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-
-        {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-          <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
-          {lastUpdatedAt && (
-            <p className="text-[10px] text-gray-400 mt-0.5">
-              最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
-                day: '2-digit', hour: '2-digit', minute: '2-digit',
-              })}　在籍中 {activeEmployees.length}名 / 対象外 {retiredEmployees.length}名
-            </p>
-          )}
-        </div>
-
-        {/* テーブルヘッダー */}
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
-          <div className="flex items-center pr-3">
-            <input
-              type="checkbox"
-              checked={allActiveChecked}
-              onChange={toggleAll}
-              className="w-4 h-4 accent-emerald-600 cursor-pointer"
-            />
-          </div>
-          <span>氏名</span>
-          <span>社員番号</span>
-          <span>部署</span>
-          <span className="pl-3">在籍状況</span>
-        </div>
-
-        {/* 全社員（在籍中→対象外の順） */}
-        <div className="divide-y divide-gray-100/80">
-          {activeEmployees.map(emp => (
-            <label
-              key={emp.employee_number}
-              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
-            >
-              <div className="flex items-center pr-3">
-                <input
-                  type="checkbox"
-                  checked={checked.has(emp.employee_number)}
-                  onChange={() => toggleOne(emp.employee_number)}
-                  className="w-4 h-4 accent-emerald-600"
-                />
-              </div>
-              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
-              <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
-              <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
-              <div className="flex items-center pl-3">
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
-                  在籍中
-                </span>
-              </div>
-            </label>
-          ))}
-          {retiredEmployees.map(emp => (
-            <div
-              key={emp.employee_number}
-              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs opacity-40"
-            >
-              <div className="flex items-center pr-3">
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
-                  対象外
-                </span>
-              </div>
-              <span className="font-medium text-gray-700 truncate self-center">{emp.name}</span>
-              <span className="text-gray-500 tabular-nums self-center">{emp.employee_number}</span>
-              <span className="text-gray-400 truncate self-center">{emp.department ?? '—'}</span>
-              <div className="flex items-center pl-3">
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
-                  退職済
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* フッター */}
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={toggleAll}
-            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
-          >
-            {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
-          </button>
-          <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
-        </div>
-      </div>
-
-      {/* ── 発報 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-sm font-bold text-gray-800">発報</h2>
-            <p className="text-xs text-gray-400 mt-0.5">在籍中 {activeEmployees.length}名 全員に安否確認を送信します</p>
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setModal('drill')}
-              disabled={checked.size === 0}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
-            >
-              🟡 訓練発報
-            </button>
-            <button
-              type="button"
-              onClick={() => setModal('production')}
-              disabled={checked.size === 0}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
-            >
-              🔴 本番発報
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* ── 社員マスタ更新 ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
         <div className="flex items-center justify-between">
@@ -276,6 +156,124 @@ export function DispatchManager({
             )}
           </div>
         )}
+      </div>
+
+      {/* ── 社員一覧 ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+        {/* ヘッダー */}
+        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+          <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
+          {lastUpdatedAt && (
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              最終更新：{new Date(lastUpdatedAt).toLocaleString('ja-JP', {
+                timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
+                day: '2-digit', hour: '2-digit', minute: '2-digit',
+              })}　在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名
+            </p>
+          )}
+        </div>
+
+        {/* テーブルヘッダー */}
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+          <div className="flex items-center pr-3">
+            <input
+              type="checkbox"
+              checked={allActiveChecked}
+              onChange={toggleAll}
+              className="w-4 h-4 accent-emerald-600 cursor-pointer"
+            />
+          </div>
+          <span>部署名</span>
+          <span>社員番号</span>
+          <span>氏名</span>
+          <span className="pl-3">在籍状況</span>
+        </div>
+
+        {/* 全社員（在籍中→退職済の順） */}
+        <div className="divide-y divide-gray-100/80">
+          {activeEmployees.map(emp => (
+            <label
+              key={emp.employee_number}
+              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors"
+            >
+              <div className="flex items-center pr-3">
+                <input
+                  type="checkbox"
+                  checked={checked.has(emp.employee_number)}
+                  onChange={() => toggleOne(emp.employee_number)}
+                  className="w-4 h-4 accent-emerald-600"
+                />
+              </div>
+              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
+              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
+              <div className="flex items-center pl-3">
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
+                  在籍中
+                </span>
+              </div>
+            </label>
+          ))}
+          {retiredEmployees.map(emp => (
+            <div
+              key={emp.employee_number}
+              className="grid grid-cols-[auto_1fr_1fr_1fr_auto] px-4 py-2.5 text-xs"
+            >
+              <div className="flex items-center pr-3">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-400 text-[10px] font-bold leading-none">
+                  ✕
+                </span>
+              </div>
+              <span className="text-gray-800 truncate self-center">{emp.department ?? '—'}</span>
+              <span className="text-gray-800 tabular-nums self-center">{emp.employee_number}</span>
+              <span className="font-medium text-gray-800 truncate self-center">{emp.name}</span>
+              <div className="flex items-center pl-3">
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap">
+                  退職済
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* フッター */}
+        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
+          >
+            {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
+          </button>
+          <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
+        </div>
+      </div>
+
+      {/* ── 発報 ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <div>
+          <h2 className="text-sm font-bold text-gray-800">発報</h2>
+          <p className="text-xs text-gray-400 mt-0.5">在籍中 {activeEmployees.length}名 全員に安否確認を送信します</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setModal('drill')}
+            disabled={checked.size === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
+          >
+            🟡 訓練発報
+          </button>
+          <button
+            type="button"
+            onClick={() => setModal('production')}
+            disabled={checked.size === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
+          >
+            🔴 本番発報
+          </button>
+        </div>
       </div>
 
       {/* 発報モーダル */}
