@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
   })
 
   if (error) {
-    console.error('[sync-employees] RPC error:', error.message)
-    return Response.json({ success: false, error: 'Sync failed' }, { status: 500 })
+    console.error('[sync-employees] RPC error:', error.message, error.details, error.hint)
+    return Response.json({ success: false, error: `${error.message} | ${error.details ?? ''} | ${error.hint ?? ''}` }, { status: 500 })
   }
 
   return Response.json(data)
