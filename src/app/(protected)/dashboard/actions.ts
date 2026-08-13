@@ -46,6 +46,8 @@ export async function submitResponse(_prev: State, formData: FormData): Promise<
   const { error: insertError } = await admin.from('responses').insert({
     event_id: eventId,
     employee_number: employee.employee_number,
+    name: employee.name,
+    department: employee.department,
     self_status: selfStatus,
     family_status: familyStatus,
     work_status: workStatus,
