@@ -80,38 +80,38 @@ export default async function EventDetailPage({
 
       <EventSummary event={event as Event} answeredCount={answeredCount} totalCount={totalCount} />
 
-      {/* あなたの回答 */}
-      <div className="bg-white border-y border-gray-100 px-4 py-3 space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-emerald-700 shrink-0">あなたの回答</h2>
-          {myResponse?.self_status ? (
-            <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-none whitespace-nowrap">
-              ✓ 回答済み
-            </span>
-          ) : (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-xs font-bold text-red-600 animate-pulse whitespace-nowrap">急いでください！</span>
-              <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 rounded-none animate-pulse whitespace-nowrap">未回答</span>
+      {/* あなたの回答（最新イベントのみ表示） */}
+      {isLatest && (
+        <div className="bg-white border-y border-gray-100 px-4 py-3 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-emerald-700 shrink-0">あなたの回答</h2>
+            {myResponse?.self_status ? (
+              <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-none whitespace-nowrap">
+                ✓ 回答済み
+              </span>
+            ) : (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-xs font-bold text-red-600 animate-pulse whitespace-nowrap">急いでください！</span>
+                <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 rounded-none animate-pulse whitespace-nowrap">未回答</span>
+              </div>
+            )}
+          </div>
+
+          {myResponse?.self_status && (
+            <div className="grid grid-cols-3 gap-x-2 text-[11px]">
+              <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponse.self_status] ?? myResponse.self_status}</span></span>
+              <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponse.family_status ? (FAMILY_STATUS_LABELS[myResponse.family_status] ?? myResponse.family_status) : '—'}</span></span>
+              <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponse.work_status ? (WORK_STATUS_LABELS[myResponse.work_status] ?? myResponse.work_status) : '—'}</span></span>
             </div>
           )}
-        </div>
 
-        {myResponse?.self_status && (
-          <div className="grid grid-cols-3 gap-x-2 text-[11px]">
-            <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponse.self_status] ?? myResponse.self_status}</span></span>
-            <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponse.family_status ? (FAMILY_STATUS_LABELS[myResponse.family_status] ?? myResponse.family_status) : '—'}</span></span>
-            <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponse.work_status ? (WORK_STATUS_LABELS[myResponse.work_status] ?? myResponse.work_status) : '—'}</span></span>
-          </div>
-        )}
-
-        {isLatest && (
           <ResponseForm
             eventId={id}
             hasAnswered={!!myResponse?.self_status}
             currentResponse={myResponse}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ステータス一覧 */}
       <div className="pt-4">

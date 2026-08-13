@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
 import { signOut } from '@/app/auth/actions'
-import { formatDateTime, formatDateTimeFull, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS } from '@/lib/utils'
+import { formatDateTime, formatDateTimeFull, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS, STATUS_GROUP_CONFIG } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
 
@@ -241,6 +241,13 @@ function LatestEventPanel({
   )
 }
 
+const STATUS_ITEMS = [
+  { key: 'safe'      as const, label: '無事'   },
+  { key: 'critical'  as const, label: '要対応' },
+  { key: 'checking'  as const, label: '確認中' },
+  { key: 'unanswered'as const, label: '未回答' },
+]
+
 function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }) {
   const displayType = getDisplayEventType(event)
   const isDrill = displayType === 'test'
@@ -254,45 +261,38 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
     >
       <div className="flex items-center gap-3 px-4 py-3.5">
         {/* 左アクセントライン */}
-        <div className={cn('w-1 h-12 shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
+        <div className={cn('w-1 self-stretch shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
 
-        <div className="flex-1 min-w-0 space-y-0.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn(
-              'text-xs font-bold px-2 py-0.5',
-              isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800',
-            )}>
-              {isDrill ? '🟡 訓練' : '🔴 本番'}
+        <div className="flex-1 min-w-0">
+          {/* 発報タイプ・日時 */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className={cn('text-xs font-bold px-2 py-0.5', isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}>
+              {isDrill ? '訓練' : '本番'}
             </span>
             <span className="text-xs text-gray-400 tabular-nums">{formatDateTime(event.issued_at)}</span>
           </div>
-          {event.max_intensity != null && (
-            <p className="text-sm font-bold text-gray-800">
+
+          {/* 震度・震源地 or コメント */}
+          {event.max_intensity != null ? (
+            <p className="text-sm font-bold text-gray-800 mb-2">
               震度{formatIntensity(event.max_intensity)}
               {event.epicenter && <span className="font-normal text-gray-500 ml-2">{event.epicenter}</span>}
             </p>
+          ) : event.comment ? (
+            <p className="text-sm text-gray-600 truncate mb-2">{event.comment}</p>
+          ) : (
+            <div className="mb-2" />
           )}
-          {!event.max_intensity && event.comment && (
-            <p className="text-sm text-gray-600 truncate">{event.comment}</p>
-          )}
-        </div>
 
-        <div className="text-right shrink-0 space-y-1">
-          <p className="text-base font-bold text-gray-900 tabular-nums">
-            {answered}<span className="text-xs font-normal text-gray-400"> / {total}名</span>
-          </p>
-          <div className="flex items-center gap-1 justify-end flex-wrap">
-            {(counts?.critical ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5">
-                要対応 {counts!.critical}
+          {/* ステータス（4区分・常時表示） */}
+          <div className="grid grid-cols-4 gap-1">
+            {STATUS_ITEMS.map(({ key, label }) => (
+              <span key={key} className={cn('text-[10px] font-semibold px-1.5 py-0.5 text-center', STATUS_GROUP_CONFIG[key].badgeClass)}>
+                {label} {counts?.[key] ?? 0}
               </span>
-            )}
-            {(counts?.unanswered ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5">
-                未回答 {counts!.unanswered}
-              </span>
-            )}
+            ))}
           </div>
+          <p className="text-[10px] text-gray-400 mt-1 tabular-nums">{answered} / {total}名 回答済み</p>
         </div>
 
         <svg className="w-4 h-4 text-gray-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
