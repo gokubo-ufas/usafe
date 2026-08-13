@@ -59,17 +59,22 @@ export async function GET(): Promise<Response> {
   for (const next of incoming) {
     const prev = currentMap.get(next.employee_number)
     if (!prev) {
-      diff.push({ kind: 'added', row: next })
+      // DBにない新規社員（在籍中のみ追加対象、退職済みはスキップ）
+      if (next.is_active) diff.push({ kind: 'added', row: next })
+    } else if (prev.is_active && !next.is_active) {
+      // 在籍中 → 退職済み
+      diff.push({ kind: 'deactivated', row: next })
     } else if (
       prev.name !== next.name ||
       prev.email !== next.email ||
       prev.department !== next.department ||
-      prev.is_active !== next.is_active
+      (!prev.is_active && next.is_active) // 退職済み → 在籍中（再雇用）
     ) {
       diff.push({ kind: 'changed', before: prev, after: next })
     }
   }
 
+  // スプレッドシートから完全に消えた在籍中社員
   for (const prev of current) {
     if (prev.is_active && !incomingMap.has(prev.employee_number)) {
       diff.push({ kind: 'deactivated', row: prev })
