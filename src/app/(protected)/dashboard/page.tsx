@@ -33,21 +33,31 @@ export default async function DashboardPage() {
     )
   }
 
-  const { data: myLatestResponse } = await admin
-    .from('responses')
-    .select('self_status')
-    .eq('event_id', latestEvent.event_id)
-    .eq('employee_number', employee.employee_number)
-    .maybeSingle()
+  const [
+    { data: myLatestResponse },
+    { count: totalEmployees },
+    { data: answeredData },
+  ] = await Promise.all([
+    admin.from('responses').select('self_status')
+      .eq('event_id', latestEvent.event_id)
+      .eq('employee_number', employee.employee_number)
+      .maybeSingle(),
+    admin.from('employees').select('*', { count: 'exact', head: true }),
+    admin.from('responses').select('employee_number')
+      .eq('event_id', latestEvent.event_id)
+      .not('self_status', 'is', null),
+  ])
 
   const hasAnswered = !!myLatestResponse?.self_status
+  const formAnsweredCount = new Set((answeredData ?? []).map((r) => r.employee_number)).size
+  const formTotalCount = totalEmployees ?? 0
 
   if (!hasAnswered) {
     const bgClass = latestEvent.event_type === 'test' ? 'bg-amber-50' : 'bg-red-50'
     return (
       <>
         <div className={`fixed inset-0 -z-10 ${bgClass}`} />
-        <InlineResponseForm event={latestEvent as Event} />
+        <InlineResponseForm event={latestEvent as Event} answeredCount={formAnsweredCount} totalCount={formTotalCount} />
       </>
     )
   }
@@ -145,38 +155,38 @@ function LatestEventPanel({
 
   return (
     <div className="border-y border-gray-100 overflow-hidden">
-      {/* カラーブロック：全情報 */}
-      <div className={cn('px-4 pt-4 pb-4', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
+      {/* カラーブロック：全情報（全テキスト白太字） */}
+      <div className={cn('px-4 pt-4 pb-4 font-bold text-white', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
         {/* 震度（左）＋ 回答数・発報情報（右） */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
             {event.max_intensity != null ? (
               <>
-                <p className="text-xs font-bold tracking-[0.15em] uppercase mb-0.5 text-white/65">最大震度</p>
-                <p className="font-black leading-none tracking-tighter text-white"
+                <p className="text-xs tracking-[0.15em] uppercase mb-0.5">最大震度</p>
+                <p className="font-black leading-none tracking-tighter"
                    style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
                   {formatIntensity(event.max_intensity)}
                 </p>
                 {event.epicenter && (
-                  <p className="text-xl font-bold mt-1.5 text-white">
-                    <span className="text-xs font-normal text-white/65 mr-1">震源地：</span>
+                  <p className="text-xl mt-1.5">
+                    <span className="text-xs mr-1">震源地：</span>
                     {event.epicenter}
                   </p>
                 )}
               </>
             ) : !event.comment ? (
-              <p className="text-lg font-bold text-white">安否確認を行ってください</p>
+              <p className="text-lg">安否確認を行ってください</p>
             ) : null}
           </div>
           <div className="text-right shrink-0">
             {counts && (
-              <div className="mb-3 text-white/65">
-                <span className="font-black text-2xl leading-none text-white">{answered}</span>
+              <div className="mb-3">
+                <span className="font-black text-2xl leading-none">{answered}</span>
                 <span className="text-sm"> / {counts.total}名</span>
                 <p className="text-[10px] mt-0.5">回答済み</p>
               </div>
             )}
-            <p className="text-white/65 text-[11px] tabular-nums leading-relaxed">
+            <p className="text-[11px] tabular-nums leading-relaxed">
               {formatDateTimeFull(event.issued_at)}<br />
               発報（{event.issuer ?? '自動発報'}）
             </p>
@@ -184,14 +194,14 @@ function LatestEventPanel({
         </div>
 
         {/* 特記事項（常時表示） */}
-        <p className="text-sm mb-4 leading-relaxed text-white">
-          <span className="text-xs font-bold tracking-[0.1em] uppercase mr-2 text-white/65">特記事項</span>
+        <p className="text-sm mb-4 leading-relaxed">
+          <span className="text-xs tracking-[0.1em] uppercase mr-2">特記事項</span>
           {event.comment ?? '—'}
         </p>
 
         {/* 警告文（右下） */}
         <div className="flex justify-end mt-1">
-          <p className="text-sm font-bold tracking-wide text-white/65">
+          <p className="text-sm tracking-wide">
             ※ {isDrill ? 'これは避難訓練です' : 'これは訓練ではありません'}
           </p>
         </div>
