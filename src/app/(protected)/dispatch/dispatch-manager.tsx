@@ -129,6 +129,21 @@ export function DispatchManager({
           </button>
       </div>
 
+      {/* ── 対象選択 ── */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-gray-900">対象選択</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
+          >
+            {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
+          </button>
+        </div>
+      </div>
+
       {/* ── スプレッドシート取得 ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
@@ -238,17 +253,6 @@ export function DispatchManager({
           ))}
         </div>
 
-        {/* フッター */}
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={toggleAll}
-            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
-          >
-            {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
-          </button>
-          <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
-        </div>
       </div>
 
       {/* 発報モーダル */}
