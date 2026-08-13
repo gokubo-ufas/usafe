@@ -10,7 +10,17 @@ export default async function DispatchPage() {
     .order('department', { nullsFirst: false })
     .order('is_active', { ascending: false })
 
-  const employees = data ?? []
+  const employees = (data ?? []).sort((a, b) => {
+    const numA = Number(a.employee_number)
+    const numB = Number(b.employee_number)
+    const byNum = !isNaN(numA) && !isNaN(numB)
+      ? numA - numB
+      : a.employee_number.localeCompare(b.employee_number, 'ja')
+    if (byNum !== 0) return byNum
+    const byDept = (a.department ?? '').localeCompare(b.department ?? '', 'ja')
+    if (byDept !== 0) return byDept
+    return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0)
+  })
 
   const lastUpdatedAt = employees.length > 0
     ? employees.reduce((max, e) => e.updated_at > max ? e.updated_at : max, employees[0].updated_at)
