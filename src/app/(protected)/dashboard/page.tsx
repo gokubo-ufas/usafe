@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
 import { signOut } from '@/app/auth/actions'
-import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup } from '@/lib/utils'
+import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
 
@@ -85,15 +85,18 @@ export default async function DashboardPage() {
   }
 
   const [latest, ...past] = events
+  const myResponseForLatest = latest
+    ? (latestByKey.get(`${latest.event_id}:${employee.employee_number}`) ?? null)
+    : null
 
   return (
-    <div className="space-y-6 pt-4">
-      <section>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-600 px-4 mb-2">最新の発報</h2>
-        <div className="divide-y divide-gray-100">
-          {latest && <EventCard event={latest} counts={countMap.get(latest.event_id)} />}
-        </div>
-      </section>
+    <div className="space-y-6">
+      {latest && (
+        <section>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
+          <LatestEventPanel event={latest} myResponse={myResponseForLatest} counts={countMap.get(latest.event_id)} />
+        </section>
+      )}
 
       {past.length > 0 && (
         <section>
@@ -127,6 +130,84 @@ export default async function DashboardPage() {
 }
 
 type CardEvent = Pick<Event, 'event_id' | 'event_type' | 'issued_at' | 'issuer' | 'comment' | 'earthquake_info_id' | 'max_intensity' | 'epicenter'>
+
+function LatestEventPanel({
+  event,
+  myResponse,
+  counts,
+}: {
+  event: CardEvent
+  myResponse: Response | null
+  counts?: GroupCounts
+}) {
+  const isDrill = getDisplayEventType(event) === 'test'
+  const answered = (counts?.safe ?? 0) + (counts?.critical ?? 0) + (counts?.checking ?? 0)
+
+  return (
+    <div className="border-y border-gray-100 overflow-hidden">
+      {/* 緊急バナー */}
+      <div className={isDrill ? 'bg-amber-400 px-4 pt-4 pb-4' : 'bg-red-600 px-4 pt-4 pb-4'}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-white font-bold text-sm">{isDrill ? '🟡 避難訓練' : '🔴 安否確認'}</span>
+            <span className="text-white/70 text-xs tabular-nums">{formatDateTime(event.issued_at)}</span>
+          </div>
+          {counts && (
+            <span className="text-white/70 text-xs tabular-nums shrink-0">
+              <span className="font-black text-white">{answered}</span> / {counts.total}名
+            </span>
+          )}
+        </div>
+        <p className={`text-xs font-bold mt-1 ${isDrill ? 'text-amber-900/70' : 'text-white/80'}`}>
+          {isDrill ? '⚠️ これは避難訓練です' : '🚨 これは訓練ではありません'}
+        </p>
+        {event.max_intensity != null ? (
+          <div className="mt-2">
+            <p className="text-white/80 text-xs font-semibold">最大震度</p>
+            <p className="text-white font-black leading-none tracking-tighter mt-0.5"
+               style={{ fontSize: 'clamp(3rem, 15vw, 4.5rem)' }}>
+              {formatIntensity(event.max_intensity)}
+            </p>
+            {event.epicenter && <p className="text-white text-base font-bold mt-1">{event.epicenter}</p>}
+          </div>
+        ) : event.comment ? (
+          <p className="text-white text-base font-bold mt-2 leading-snug">{event.comment}</p>
+        ) : null}
+        <p className="text-white/60 text-xs mt-2">発報者：{event.issuer ?? '自動'}</p>
+      </div>
+
+      {/* あなたの回答 */}
+      <div className="bg-white px-4 py-3 space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-gray-700">あなたの回答</h3>
+          {myResponse?.self_status ? (
+            <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1">✓ 回答済み</span>
+          ) : (
+            <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 animate-pulse">未回答</span>
+          )}
+        </div>
+        {myResponse?.self_status && (
+          <div className="grid grid-cols-3 gap-x-2 text-[11px]">
+            <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponse.self_status] ?? myResponse.self_status}</span></span>
+            <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponse.family_status ? (FAMILY_STATUS_LABELS[myResponse.family_status] ?? myResponse.family_status) : '—'}</span></span>
+            <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponse.work_status ? (WORK_STATUS_LABELS[myResponse.work_status] ?? myResponse.work_status) : '—'}</span></span>
+          </div>
+        )}
+        <Link
+          href={`/events/${event.event_id}`}
+          className={cn(
+            'block w-full py-2.5 text-center text-sm font-semibold transition-colors',
+            isDrill
+              ? 'bg-amber-400 text-amber-950 hover:bg-amber-500'
+              : 'bg-red-500 text-white hover:bg-red-600',
+          )}
+        >
+          {myResponse?.self_status ? '回答を更新する' : '今すぐ回答する'}
+        </Link>
+      </div>
+    </div>
+  )
+}
 
 function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }) {
   const displayType = getDisplayEventType(event)
