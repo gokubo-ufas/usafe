@@ -42,7 +42,6 @@ export function DispatchManager({
   const activeState = modal === 'drill' ? drillState   : prodState
 
   const router = useRouter()
-
   const [syncPending, startSync] = useTransition()
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null)
 
@@ -98,131 +97,153 @@ export function DispatchManager({
   const successState = drillState.success ? drillState : prodState.success ? prodState : null
   if (successState?.success) {
     return (
-      <div className={cn(
-        'rounded-none border p-6 space-y-4',
-        successState.slackFailed ? 'bg-amber-50 border-amber-300' : 'bg-emerald-50 border-emerald-300',
-      )}>
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">{successState.slackFailed ? '⚠️' : '✅'}</span>
-          <p className={cn('text-sm font-medium leading-relaxed', successState.slackFailed ? 'text-amber-800' : 'text-emerald-800')}>
-            {successState.success}
-          </p>
+      <div className="px-4 pt-8 space-y-4">
+        <div className={cn(
+          'border p-5 space-y-4',
+          successState.slackFailed ? 'bg-amber-50 border-amber-300' : 'bg-emerald-50 border-emerald-300',
+        )}>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">{successState.slackFailed ? '⚠️' : '✅'}</span>
+            <p className={cn('text-sm font-medium leading-relaxed', successState.slackFailed ? 'text-amber-800' : 'text-emerald-800')}>
+              {successState.success}
+            </p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="block w-full py-3 text-center text-sm font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            ダッシュボードへ戻る
+          </Link>
         </div>
-        <Link href="/dashboard" className="block w-full py-3 text-center text-sm font-semibold rounded-none bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
-          ダッシュボードへ戻る
-        </Link>
       </div>
     )
   }
 
-  return (
-    <div className="space-y-4">
+  // 部署でグループ化
+  const deptMap = new Map<string, Employee[]>()
+  for (const emp of activeEmployees) {
+    const dept = emp.department ?? '部署未設定'
+    if (!deptMap.has(dept)) deptMap.set(dept, [])
+    deptMap.get(dept)!.push(emp)
+  }
 
-      <div className="flex gap-3">
+  const lastSyncLabel = lastUpdatedAt
+    ? new Date(lastUpdatedAt).toLocaleString('ja-JP', {
+        timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+      })
+    : null
+
+  return (
+    <div>
+      {/* 発報ボタン */}
+      <div className="grid grid-cols-2 gap-px bg-gray-200 border-b border-gray-200">
         <button
           type="button"
           onClick={() => setModal('drill')}
           disabled={checked.size === 0}
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-950 rounded-none transition-colors disabled:opacity-40"
+          className="flex flex-col items-center justify-center gap-1.5 py-6 bg-amber-400 hover:bg-amber-500 text-amber-950 transition-colors disabled:opacity-40"
         >
-          🟡 訓練発報
+          <span className="text-xl leading-none">🟡</span>
+          <span className="text-sm font-bold">訓練発報</span>
+          <span className="text-[10px] text-amber-800/70">{checked.size}名に送信</span>
         </button>
         <button
           type="button"
           onClick={() => setModal('production')}
           disabled={checked.size === 0}
-          className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-500 hover:bg-red-600 text-white rounded-none transition-colors disabled:opacity-40"
+          className="flex flex-col items-center justify-center gap-1.5 py-6 bg-red-500 hover:bg-red-600 text-white transition-colors disabled:opacity-40"
         >
-          🔴 本番発報
+          <span className="text-xl leading-none">🔴</span>
+          <span className="text-sm font-bold">本番発報</span>
+          <span className="text-[10px] text-white/60">{checked.size}名に送信</span>
         </button>
       </div>
 
-      <div className="space-y-2">
-        <h2 className="text-sm font-bold text-gray-700">社員情報取得</h2>
-        <div className="space-y-1.5">
-          <button
-            type="button"
-            onClick={fetchAndSync}
-            disabled={syncPending}
-            className="w-full flex flex-col items-center justify-center gap-0.5 py-3 px-4 rounded-none bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors disabled:opacity-40"
-          >
-            <span className="text-sm font-semibold text-emerald-700">
-              {syncPending ? '取得中…' : '社員SpreadSheetを取得し最新化'}
-            </span>
-            <span className="text-[11px] text-emerald-500">
-              {lastUpdatedAt
-                ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
-                : '未取得'}
-            </span>
-          </button>
-          {syncResult?.ok && (
-            <p className="text-xs text-center text-emerald-600">最新化が完了しました。</p>
-          )}
-          {syncResult && !syncResult.ok && (
-            <div className="rounded-none bg-amber-50 border border-amber-200 px-4 py-3 space-y-0.5">
-              <p className="text-xs font-semibold text-amber-800">スプレッドシートとの同期に失敗しました</p>
-              <p className="text-xs text-amber-700">現在アプリに登録されている社員情報で発報できますが、発報先の内容を確認してから発報してください。</p>
-            </div>
-          )}
-        </div>
+      {/* 対象者ヘッダー */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-white">
+        <span className="text-xs font-bold text-gray-500">
+          発報対象
+          <span className="text-emerald-600 tabular-nums ml-1.5">{checked.size}</span>
+          <span className="text-gray-400 font-normal"> / {activeEmployees.length}名</span>
+        </span>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
+        >
+          {allActiveChecked ? '全解除' : '全選択'}
+        </button>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-700">対象選択</h2>
-          <span className="text-[11px] text-gray-400">合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
-        </div>
-        <div className="flex items-center justify-between px-0.5">
-          <button
-            type="button"
-            onClick={toggleAll}
-            className="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors"
-          >
-            {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
-          </button>
-          <span className="text-sm text-gray-500">{checked.size}名を選択中</span>
-        </div>
-        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
-            <input
-              type="checkbox"
-              checked={allActiveChecked}
-              onChange={toggleAll}
-              className="w-4 h-4 accent-emerald-600 cursor-pointer"
-            />
-            <span>部署名</span>
-            <span>氏名</span>
-            <span>在籍状況</span>
-          </div>
-          <div className="divide-y divide-gray-100/80">
-            {employees.map(emp => emp.is_active ? (
+      {/* 社員リスト（部署ごと） */}
+      <div className="bg-white">
+        {[...deptMap.entries()].map(([dept, emps]) => (
+          <div key={dept}>
+            <div className="px-4 py-1.5 bg-gray-50 border-y border-gray-100">
+              <span className="text-[10px] font-semibold text-gray-400 tracking-wide">{dept}</span>
+            </div>
+            {emps.map(emp => (
               <label
                 key={emp.employee_number}
-                className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs cursor-pointer hover:bg-gray-50/60 transition-colors items-center"
+                className="flex items-center gap-3.5 px-4 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50/80 transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={checked.has(emp.employee_number)}
                   onChange={() => toggleOne(emp.employee_number)}
-                  className="w-4 h-4 accent-emerald-600"
+                  className="w-4 h-4 accent-emerald-600 shrink-0"
                 />
-                <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
-                <span className="font-medium text-gray-800 truncate">{emp.name}</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">在籍中</span>
+                <span className="text-sm font-medium text-gray-800">{emp.name}</span>
               </label>
-            ) : (
+            ))}
+          </div>
+        ))}
+
+        {retiredEmployees.length > 0 && (
+          <div>
+            <div className="px-4 py-1.5 bg-gray-50 border-y border-gray-100">
+              <span className="text-[10px] font-semibold text-gray-300 tracking-wide">退職済み（対象外）</span>
+            </div>
+            {retiredEmployees.map(emp => (
               <div
                 key={emp.employee_number}
-                className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
+                className="flex items-center gap-3.5 px-4 py-3 border-b border-gray-100 opacity-35"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded-none bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">✕</span>
-                <span className="text-gray-400 truncate">{emp.department ?? '—'}</span>
-                <span className="font-medium text-gray-400 truncate">{emp.name}</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-gray-100 text-gray-500 whitespace-nowrap text-center">退職済</span>
+                <span className="w-4 h-4 shrink-0" />
+                <span className="text-sm text-gray-500 line-through">{emp.name}</span>
+                {emp.department && (
+                  <span className="text-[10px] text-gray-400 ml-auto">{emp.department}</span>
+                )}
               </div>
             ))}
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* 社員情報同期（セカンダリ） */}
+      <div className="px-4 pt-4 pb-8 space-y-2">
+        <button
+          type="button"
+          onClick={fetchAndSync}
+          disabled={syncPending}
+          className="w-full flex items-center justify-between px-4 py-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors disabled:opacity-40"
+        >
+          <span className="text-xs font-medium text-gray-500">
+            {syncPending ? '取得中…' : '社員情報をスプレッドシートから更新'}
+          </span>
+          <span className="text-[10px] text-gray-400 shrink-0 ml-3">
+            {lastSyncLabel ? `最終 ${lastSyncLabel}` : '未取得'}
+          </span>
+        </button>
+        {syncResult?.ok && (
+          <p className="text-xs text-center text-emerald-600">更新が完了しました。</p>
+        )}
+        {syncResult && !syncResult.ok && (
+          <div className="border border-amber-200 bg-amber-50 px-4 py-3 space-y-0.5">
+            <p className="text-xs font-semibold text-amber-800">スプレッドシートとの同期に失敗しました</p>
+            <p className="text-xs text-amber-700">現在のデータで発報できますが、内容を確認してから発報してください。</p>
+          </div>
+        )}
       </div>
 
       {modal && (
@@ -274,24 +295,36 @@ function DispatchModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
-        <div className="bg-white rounded-none shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 shrink-0">
-            <h2 className="text-base font-bold text-gray-900">{isDrill ? '🟡 避難訓練発報' : '🔴 本番発報'}</h2>
-            <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          </div>
-          <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
-            <p className="text-sm text-gray-600">
-              選択した <span className="font-bold text-gray-900">{employeeCount}名</span> に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
+      <div
+        className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      >
+        <div className="bg-white shadow-2xl w-full sm:max-w-xs max-h-[88vh] flex flex-col">
+          {/* モーダルヘッダー */}
+          <div className={cn(
+            'px-5 pt-4 pb-3 border-b border-white/20 shrink-0',
+            isDrill ? 'bg-amber-400' : 'bg-red-500',
+          )}>
+            <div className="flex items-center justify-between">
+              <h2 className={cn('text-base font-bold', isDrill ? 'text-amber-950' : 'text-white')}>
+                {isDrill ? '避難訓練発報' : '本番発報'}
+              </h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className={cn('w-8 h-8 flex items-center justify-center', isDrill ? 'text-amber-800 hover:text-amber-950' : 'text-white/70 hover:text-white')}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className={cn('text-xs mt-0.5', isDrill ? 'text-amber-800' : 'text-white/70')}>
+              {employeeCount}名に安否確認を送信します
             </p>
+          </div>
 
-            {isDrill && (
-              <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2">
-                ⚠️ これは避難訓練です
-              </p>
-            )}
+          <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
             {!isDrill && (
               <p className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-2">
                 🚨 これは訓練ではありません
@@ -300,12 +333,15 @@ function DispatchModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                最大震度 <span className="font-normal text-gray-400">（任意）</span>
+                最大震度 <span className="font-normal text-gray-400 text-xs">任意</span>
               </label>
               <select
                 value={intensity}
                 onChange={(e) => setIntensity(e.target.value)}
-                className={cn('w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+                className={cn(
+                  'w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent',
+                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
+                )}
               >
                 {INTENSITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
@@ -313,44 +349,82 @@ function DispatchModal({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                震源地 <span className="font-normal text-gray-400">（任意）</span>
+                震源地 <span className="font-normal text-gray-400 text-xs">任意</span>
               </label>
               <input
                 type="text"
                 value={epicenter}
                 onChange={(e) => setEpicenter(e.target.value)}
-                placeholder="例：〇〇県沖"
-                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+                placeholder="例：神奈川県西部"
+                className={cn(
+                  'w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent',
+                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
+                )}
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
+                特記事項 <span className="font-normal text-gray-400 text-xs">任意・50文字以内</span>
               </label>
               <textarea
-                rows={2} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
-                placeholder={isDrill ? '訓練の目的や注意事項を入力してください' : '緊急事態の状況や対応指示を入力してください'}
-                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+                rows={2}
+                maxLength={50}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder={isDrill ? '訓練の目的・注意事項' : '緊急対応指示など'}
+                className={cn(
+                  'w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none',
+                  isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400',
+                )}
               />
             </div>
 
             {!isDrill && (
               <label className="flex items-start gap-3 cursor-pointer select-none">
-                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-red-600 shrink-0" />
-                <span className="text-sm text-gray-700 leading-snug">ホームと履歴で自動発報がされていないことを確認しました。本番発報することに同意します。</span>
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-red-600 shrink-0"
+                />
+                <span className="text-xs text-gray-600 leading-snug">
+                  ダッシュボードで自動発報されていないことを確認しました。本番発報に同意します。
+                </span>
               </label>
             )}
-            {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-none px-3 py-2.5">{error}</p>}
-            <div className="flex gap-3 pb-1">
-              <button type="button" onClick={onClose} disabled={isPending} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-none hover:bg-gray-200 disabled:opacity-50">キャンセル</button>
-              <button type="button" onClick={() => setShowConfirm(true)} disabled={isPending || !canSubmit} className={cn('flex-1 py-2.5 text-sm font-semibold rounded-none disabled:opacity-40 transition-colors', isDrill ? 'bg-amber-400 hover:bg-amber-500 text-amber-950' : 'bg-red-500 hover:bg-red-600 text-white')}>
+
+            {error && (
+              <p className="text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2.5">{error}</p>
+            )}
+
+            <div className="flex gap-2 pb-1">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isPending}
+                className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowConfirm(true)}
+                disabled={isPending || !canSubmit}
+                className={cn(
+                  'flex-1 py-2.5 text-sm font-bold disabled:opacity-40 transition-colors',
+                  isDrill
+                    ? 'bg-amber-400 hover:bg-amber-500 text-amber-950'
+                    : 'bg-red-500 hover:bg-red-600 text-white',
+                )}
+              >
                 {isPending ? '発報中…' : '発報する'}
               </button>
             </div>
           </div>
         </div>
       </div>
+
       <ConfirmModal
         isOpen={showConfirm}
         title={isDrill ? '避難訓練の確認' : '本番発報の確認'}

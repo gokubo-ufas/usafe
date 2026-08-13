@@ -31,13 +31,5 @@ export default async function DispatchPage() {
     ? employees.reduce((max, e) => e.updated_at > max ? e.updated_at : max, employees[0].updated_at)
     : null
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-bold text-gray-900">発報管理</h1>
-        <p className="text-sm text-gray-500 mt-0.5">発報先を確認・選択して発報してください。</p>
-      </div>
-      <DispatchManager employees={employees} lastUpdatedAt={lastUpdatedAt} />
-    </div>
-  )
+  return <DispatchManager employees={employees} lastUpdatedAt={lastUpdatedAt} />
 }

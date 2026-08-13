@@ -1,9 +1,16 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { signOut } from '@/app/auth/actions'
 
 export function Header() {
+  const pathname = usePathname()
+  const showNav = pathname === '/dashboard' || pathname.startsWith('/dispatch')
+
   return (
     <header className="bg-gray-950/90 border-b border-white/[0.08] sticky top-0 z-40 backdrop-blur-md">
-      <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
+      <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <svg viewBox="0 0 32 32" className="w-7 h-7 shrink-0" fill="none" aria-hidden>
             <path
@@ -27,6 +34,25 @@ export function Header() {
             <span className="text-white/40 text-[10px] tracking-wide">安否確認ツール</span>
           </div>
         </Link>
+
+        {showNav && (
+          <div className="flex items-center gap-4">
+            <Link
+              href="/dispatch"
+              className="text-xs font-medium text-white/60 hover:text-white transition-colors"
+            >
+              発報管理
+            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-xs font-medium text-white/60 hover:text-white transition-colors"
+              >
+                ログアウト
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </header>
   )

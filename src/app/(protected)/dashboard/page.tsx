@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentEmployee } from '@/lib/auth/session'
 import { InlineResponseForm } from './inline-response-form'
-import { signOut } from '@/app/auth/actions'
-import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup, SELF_STATUS_LABELS, FAMILY_STATUS_LABELS, WORK_STATUS_LABELS, STATUS_GROUP_CONFIG } from '@/lib/utils'
+import { EventSummary } from '@/components/event-summary'
+import { formatDateTime, formatIntensity, getDisplayEventType, getStatusGroup, STATUS_GROUP_CONFIG } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Event, Response } from '@/types'
 
@@ -95,48 +95,19 @@ export default async function DashboardPage() {
   }
 
   const [latest, ...past] = events
-  const myResponseForLatest = latest
-    ? (latestByKey.get(`${latest.event_id}:${employee.employee_number}`) ?? null)
-    : null
-  const isDrillLatest = latest ? getDisplayEventType(latest) === 'test' : false
 
   return (
     <div className="space-y-6">
       {latest && (
         <section>
           <h2 className="text-base font-bold text-emerald-600 px-4 pt-4 pb-2">最新の発報</h2>
-          <div className="border-y border-gray-100">
-            <EventCard event={latest} counts={countMap.get(latest.event_id)} />
-            {/* あなたの回答 */}
-            <div className="bg-white border-t border-gray-100 px-4 py-3 space-y-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-gray-700">あなたの回答</h3>
-                {myResponseForLatest?.self_status ? (
-                  <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1">✓ 回答済み</span>
-                ) : (
-                  <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 animate-pulse">未回答</span>
-                )}
-              </div>
-              {myResponseForLatest?.self_status && (
-                <div className="grid grid-cols-3 gap-x-2 text-[11px]">
-                  <span><span className="text-gray-400">本人：</span><span className="font-semibold text-gray-700">{SELF_STATUS_LABELS[myResponseForLatest.self_status] ?? myResponseForLatest.self_status}</span></span>
-                  <span><span className="text-gray-400">家族：</span><span className="font-semibold text-gray-700">{myResponseForLatest.family_status ? (FAMILY_STATUS_LABELS[myResponseForLatest.family_status] ?? myResponseForLatest.family_status) : '—'}</span></span>
-                  <span><span className="text-gray-400">業務：</span><span className="font-semibold text-gray-700">{myResponseForLatest.work_status ? (WORK_STATUS_LABELS[myResponseForLatest.work_status] ?? myResponseForLatest.work_status) : '—'}</span></span>
-                </div>
-              )}
-              <Link
-                href={`/events/${latest.event_id}`}
-                className={cn(
-                  'block w-full py-2.5 text-center text-sm font-semibold transition-colors',
-                  isDrillLatest
-                    ? 'bg-amber-400 text-amber-950 hover:bg-amber-500'
-                    : 'bg-red-500 text-white hover:bg-red-600',
-                )}
-              >
-                {myResponseForLatest?.self_status ? '回答を更新する' : '今すぐ回答する'}
-              </Link>
-            </div>
-          </div>
+          <Link href={`/events/${latest.event_id}`} className="block">
+            <EventSummary
+              event={latest as Event}
+              answeredCount={(countMap.get(latest.event_id)?.safe ?? 0) + (countMap.get(latest.event_id)?.critical ?? 0) + (countMap.get(latest.event_id)?.checking ?? 0)}
+              totalCount={countMap.get(latest.event_id)?.total ?? 0}
+            />
+          </Link>
         </section>
       )}
 
@@ -154,22 +125,6 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      <div className="flex gap-3 px-4">
-        <Link
-          href="/dispatch"
-          className="flex-1 py-2.5 text-sm font-semibold text-center text-red-600 border border-red-200 rounded-none hover:bg-red-50 transition-colors"
-        >
-          発報管理
-        </Link>
-        <form action={signOut} className="flex-1">
-          <button
-            type="submit"
-            className="w-full py-2.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-none hover:bg-gray-50 transition-colors"
-          >
-            ログアウト
-          </button>
-        </form>
-      </div>
     </div>
   )
 }
