@@ -43,7 +43,7 @@ export function Header() {
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1">
           <NavItem href="/history">履歴</NavItem>
-          <AlertNavItem href="/dispatch">手動発報</AlertNavItem>
+          <AlertNavItem href="/dispatch">発報管理</AlertNavItem>
           <form action={signOut}>
             <button
               type="submit"
@@ -79,7 +79,7 @@ export function Header() {
             履歴
           </MobileNavItem>
           <MobileAlertNavItem href="/dispatch" onClick={() => setOpen(false)}>
-            手動発報
+            発報管理
           </MobileAlertNavItem>
           <form action={signOut} className="px-4">
             <button

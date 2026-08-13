@@ -1,20 +1,28 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { DispatchForm } from './dispatch-form'
+import { DispatchManager } from './dispatch-manager'
 
 export default async function DispatchPage() {
   const admin = createAdminClient()
-  const { count } = await admin
+  const { data } = await admin
     .from('employees')
-    .select('*', { count: 'exact', head: true })
+    .select('employee_number, name, department, updated_at')
     .eq('is_active', true)
+    .order('department', { nullsFirst: false })
+    .order('employee_number')
+
+  const employees = data ?? []
+
+  const lastUpdatedAt = employees.length > 0
+    ? employees.reduce((max, e) => e.updated_at > max ? e.updated_at : max, employees[0].updated_at)
+    : null
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div>
-        <h1 className="text-lg font-bold text-gray-900">手動発報</h1>
-        <p className="text-sm text-gray-500 mt-0.5">発報種別を選択してください。</p>
+        <h1 className="text-lg font-bold text-gray-900">発報管理</h1>
+        <p className="text-sm text-gray-500 mt-0.5">発報先を確認・選択して発報してください。</p>
       </div>
-      <DispatchForm employeeCount={count ?? 0} />
+      <DispatchManager employees={employees} lastUpdatedAt={lastUpdatedAt} />
     </div>
   )
 }
