@@ -85,32 +85,24 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
       {/* カラーブロック */}
       <div className={cn('px-4 pt-5 pb-4 text-sm font-bold text-white', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
 
-        {/* 上段：震度情報（全幅） */}
-        <div className="mb-5">
-          {event.max_intensity != null ? (
-            <>
-              <p className="text-xl tracking-[0.15em] uppercase mb-0.5">最大震度</p>
-              <p className="font-black leading-none tracking-tighter"
-                 style={{ fontSize: 'clamp(4rem, 20vw, 6rem)' }}>
-                {formatIntensity(event.max_intensity)}
-              </p>
-              {event.epicenter && (
-                <p className="text-2xl mt-3">
-                  <span className="text-sm mr-1">震源地：</span>
-                  {event.epicenter}
-                </p>
-              )}
-            </>
-          ) : !event.comment ? (
-            <p className="text-lg">安否確認を行ってください</p>
-          ) : null}
-        </div>
-
-        {/* 中段：回答数（左）＋ 発報情報（右） */}
-        <div className="flex items-end justify-between gap-2 mb-4">
+        {/* 上段：震度（左）＋ 発報情報（右） */}
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <p className="text-3xl leading-none">{answeredCount} / {totalCount}名</p>
-            <p className="mt-1">回答済み</p>
+            {event.max_intensity != null ? (
+              <>
+                <p className="text-3xl font-black tracking-tight leading-tight">
+                  最大震度 {formatIntensity(event.max_intensity)}
+                </p>
+                {event.epicenter && (
+                  <p className="text-xl mt-2">
+                    <span className="text-sm mr-1">震源地：</span>
+                    {event.epicenter}
+                  </p>
+                )}
+              </>
+            ) : !event.comment ? (
+              <p className="text-lg">安否確認を行ってください</p>
+            ) : null}
           </div>
           <p className="tabular-nums text-right leading-relaxed shrink-0">
             {formatDateTimeFull(event.issued_at)}<br />
@@ -123,6 +115,9 @@ export function InlineResponseForm({ event, answeredCount, totalCount }: { event
           <span className="tracking-[0.1em] uppercase mr-2">特記事項：</span>
           {event.comment ?? '—'}
         </p>
+
+        {/* 回答数（特記事項の下、1行） */}
+        <p className="text-2xl mb-3">{answeredCount} / {totalCount}名 回答済み</p>
 
         {/* 警告文（右下） */}
         <div className="flex justify-end">
