@@ -54,15 +54,15 @@ export function isWithin24Hours(iso: string): boolean {
 export const SELF_STATUS_LABELS: Record<string, string> = {
   safe: '無事',
   injured: '負傷',
-  need_rescue: '救助が必要',
+  need_rescue: '救助必要',
 }
 
 export const FAMILY_STATUS_LABELS: Record<string, string> = {
   safe: '無事',
   injured: '負傷',
-  need_rescue: '救助が必要',
-  checking: '安否確認中',
-  not_applicable: '対象家族なし',
+  need_rescue: '救助必要',
+  checking: '確認中',
+  not_applicable: '確認不要',
 }
 
 export const WORK_STATUS_LABELS: Record<string, string> = {

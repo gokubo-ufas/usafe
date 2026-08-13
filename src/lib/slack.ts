@@ -44,12 +44,13 @@ export type SlackAlertParams =
       type: 'test'
       comment: string | null
       issuedAt: Date
+      maxIntensity?: number | null
+      epicenter?: string | null
     }
   | {
       type: 'earthquake'
       comment: string | null
       issuedAt: Date
-      // 自動発報時のみ設定。手動発報時は null
       maxIntensity?: number | null
       epicenter?: string | null
     }
@@ -74,23 +75,20 @@ export async function postSlackAlert(
 
   if (params.type === 'test') {
     // ── 訓練発報 ──────────────────────────────────────────────
+    const drillLines = ['*これは安否確認訓練です。*', '']
+    if (params.maxIntensity != null) {
+      drillLines.push(`想定震度：*震度${formatIntensity(params.maxIntensity)}*`)
+      if (params.epicenter) drillLines.push(`想定震源地：${params.epicenter}`)
+      drillLines.push('')
+    }
+    drillLines.push(
+      'U-Safeで安否確認への回答をお願いします。',
+      '',
+      '周囲に本チャンネルへ参加していない社員がいる場合は、安否確認が発報されていることをお伝えください。',
+    )
     blocks.push(
       { type: 'header', text: { type: 'plain_text', text: '🟡 【U-Safe｜安否確認訓練】' } },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: [
-            '*これは安否確認訓練です。*',
-            '',
-            'U-Safeで安否確認への回答をお願いします。',
-            '',
-            '災害時は、業務よりも本人と家族の安全を最優先してください。',
-            '',
-            '周囲に本チャンネルへ参加していない社員がいる場合は、安否確認が発報されていることをお伝えください。',
-          ].join('\n'),
-        },
-      },
+      { type: 'section', text: { type: 'mrkdwn', text: drillLines.join('\n') } },
     )
     if (params.comment) {
       blocks.push({ type: 'section', text: { type: 'mrkdwn', text: `*補足：*\n${params.comment}` } })

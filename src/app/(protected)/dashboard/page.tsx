@@ -141,12 +141,12 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
     >
       <div className="flex items-center gap-3 px-4 py-3.5">
         {/* 左アクセントライン */}
-        <div className={cn('w-1 h-12 rounded-full shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
+        <div className={cn('w-1 h-12 shrink-0', isDrill ? 'bg-amber-400' : 'bg-red-500')} />
 
         <div className="flex-1 min-w-0 space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={cn(
-              'text-xs font-bold px-2 py-0.5 rounded-full',
+              'text-xs font-bold px-2 py-0.5',
               isDrill ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800',
             )}>
               {isDrill ? '🟡 訓練' : '🔴 本番'}
@@ -170,12 +170,12 @@ function EventCard({ event, counts }: { event: CardEvent; counts?: GroupCounts }
           </p>
           <div className="flex items-center gap-1 justify-end flex-wrap">
             {(counts?.critical ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5">
                 要対応 {counts!.critical}
               </span>
             )}
             {(counts?.unanswered ?? 0) > 0 && (
-              <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5">
                 未回答 {counts!.unanswered}
               </span>
             )}

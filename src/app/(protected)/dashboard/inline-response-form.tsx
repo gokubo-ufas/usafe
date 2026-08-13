@@ -12,15 +12,15 @@ const INIT: State = {}
 const SELF_OPTIONS = [
   { value: 'safe',        label: '無事' },
   { value: 'injured',     label: '負傷' },
-  { value: 'need_rescue', label: '救助が必要' },
+  { value: 'need_rescue', label: '救助必要' },
 ]
 
 const FAMILY_OPTIONS = [
   { value: 'safe',           label: '無事' },
   { value: 'injured',        label: '負傷' },
-  { value: 'need_rescue',    label: '救助が必要' },
-  { value: 'checking',       label: '安否確認中' },
-  { value: 'not_applicable', label: '対象家族なし' },
+  { value: 'need_rescue',    label: '救助必要' },
+  { value: 'checking',       label: '確認中' },
+  { value: 'not_applicable', label: '確認不要' },
 ]
 
 const WORK_OPTIONS = [
@@ -73,12 +73,15 @@ export function InlineResponseForm({ event }: { event: Event }) {
     <div>
       {/* イベントヘッダー：フル幅の緊急バナー */}
       <div className={cn('px-4 pt-6 pb-5', isDrill ? 'bg-amber-400' : 'bg-red-600')}>
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-1">
           <span className="text-white font-bold text-sm">
             {isDrill ? '🟡 避難訓練' : '🔴 安否確認'}
           </span>
           <span className="text-white/70 text-xs tabular-nums">{formatDateTime(event.issued_at)}</span>
         </div>
+        <p className={`text-xs font-bold mb-3 ${isDrill ? 'text-amber-900/70' : 'text-white/80'}`}>
+          {isDrill ? '⚠️ これは避難訓練です' : '🚨 これは訓練ではありません'}
+        </p>
 
         {event.max_intensity != null ? (
           <div>

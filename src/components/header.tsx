@@ -22,9 +22,9 @@ export function Header() {
               </linearGradient>
             </defs>
           </svg>
-          <div>
+          <div className="flex items-baseline gap-2">
             <span className="text-white font-bold text-xl tracking-tight leading-none">U-Safe</span>
-            <span className="block text-white/40 text-[10px] tracking-wide mt-0.5">安否確認ツール</span>
+            <span className="text-white/40 text-[10px] tracking-wide">安否確認ツール</span>
           </div>
         </Link>
       </div>

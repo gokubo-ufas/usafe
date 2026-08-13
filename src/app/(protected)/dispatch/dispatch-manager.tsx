@@ -75,10 +75,12 @@ export function DispatchManager({
     })
   }
 
-  function handleDispatchConfirm(comment: string) {
+  function handleDispatchConfirm({ comment, intensity, epicenter }: { comment: string; intensity: string; epicenter: string }) {
     setModal(null)
     const fd = new FormData()
     fd.set('comment', comment)
+    fd.set('intensity', intensity)
+    fd.set('epicenter', epicenter)
     fd.set('employee_numbers', JSON.stringify([...checked]))
     if (modal === 'drill') drillAction(fd)
     else                   prodAction(fd)
@@ -206,17 +208,17 @@ export function DispatchManager({
                 />
                 <span className="text-gray-800 truncate">{emp.department ?? '—'}</span>
                 <span className="font-medium text-gray-800 truncate">{emp.name}</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">在籍中</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-emerald-100 text-emerald-700 whitespace-nowrap text-center">在籍中</span>
               </label>
             ) : (
               <div
                 key={emp.employee_number}
                 className="grid grid-cols-[1rem_1fr_1fr_4rem] gap-x-3 px-4 py-1.5 text-xs bg-gray-50 items-center"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">✕</span>
+                <span className="flex items-center justify-center w-4 h-4 rounded-none bg-gray-200 text-gray-400 text-[10px] font-bold leading-none">✕</span>
                 <span className="text-gray-400 truncate">{emp.department ?? '—'}</span>
                 <span className="font-medium text-gray-400 truncate">{emp.name}</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 whitespace-nowrap text-center">退職済</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-gray-100 text-gray-500 whitespace-nowrap text-center">退職済</span>
               </div>
             ))}
           </div>
@@ -237,6 +239,19 @@ export function DispatchManager({
   )
 }
 
+const INTENSITY_OPTIONS = [
+  { value: '',   label: '—（未設定）' },
+  { value: '10', label: '震度1' },
+  { value: '20', label: '震度2' },
+  { value: '30', label: '震度3' },
+  { value: '40', label: '震度4' },
+  { value: '45', label: '震度5弱' },
+  { value: '50', label: '震度5強' },
+  { value: '55', label: '震度6弱' },
+  { value: '60', label: '震度6強' },
+  { value: '70', label: '震度7' },
+]
+
 function DispatchModal({
   mode, employeeCount, isPending, error, onClose, onConfirm,
 }: {
@@ -245,13 +260,16 @@ function DispatchModal({
   isPending: boolean
   error?: string
   onClose: () => void
-  onConfirm: (comment: string) => void
+  onConfirm: (data: { comment: string; intensity: string; epicenter: string }) => void
 }) {
+  const isDrill = mode === 'drill'
+
   const [comment,     setComment]     = useState('')
+  const [intensity,   setIntensity]   = useState(isDrill ? '40' : '')
+  const [epicenter,   setEpicenter]   = useState(isDrill ? '訓練用（仮）' : '')
   const [agreed,      setAgreed]      = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const isDrill   = mode === 'drill'
   const canSubmit = isDrill || agreed
 
   return (
@@ -268,16 +286,55 @@ function DispatchModal({
             <p className="text-sm text-gray-600">
               選択した <span className="font-bold text-gray-900">{employeeCount}名</span> に{isDrill ? '避難訓練の' : ''}安否確認を発報します。
             </p>
+
+            {isDrill && (
+              <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2">
+                ⚠️ これは避難訓練です
+              </p>
+            )}
+            {!isDrill && (
+              <p className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-2">
+                🚨 これは訓練ではありません
+              </p>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                最大震度 <span className="font-normal text-gray-400">（任意）</span>
+              </label>
+              <select
+                value={intensity}
+                onChange={(e) => setIntensity(e.target.value)}
+                className={cn('w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+              >
+                {INTENSITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                震源地 <span className="font-normal text-gray-400">（任意）</span>
+              </label>
+              <input
+                type="text"
+                value={epicenter}
+                onChange={(e) => setEpicenter(e.target.value)}
+                placeholder="例：〇〇県沖"
+                className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 コメント <span className="font-normal text-gray-400">（任意・50文字以内）</span>
               </label>
               <textarea
-                rows={3} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
+                rows={2} maxLength={50} value={comment} onChange={(e) => setComment(e.target.value)}
                 placeholder={isDrill ? '訓練の目的や注意事項を入力してください' : '緊急事態の状況や対応指示を入力してください'}
                 className={cn('w-full text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-none px-3 py-2.5 focus:outline-none focus:ring-2 focus:border-transparent resize-none', isDrill ? 'focus:ring-amber-400' : 'focus:ring-red-400')}
               />
             </div>
+
             {!isDrill && (
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-red-600 shrink-0" />
@@ -302,7 +359,7 @@ function DispatchModal({
           : `選択した${employeeCount}名に安否確認を発報します。\nこの操作は取り消せません。よろしいですか？`}
         confirmLabel="発報する"
         onCancel={() => setShowConfirm(false)}
-        onConfirm={() => { setShowConfirm(false); onConfirm(comment) }}
+        onConfirm={() => { setShowConfirm(false); onConfirm({ comment, intensity, epicenter }) }}
         isPending={isPending}
         danger={!isDrill}
         warning={isDrill}

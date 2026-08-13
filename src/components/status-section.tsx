@@ -10,15 +10,15 @@ const GROUP_ORDER = ['critical', 'checking', 'unanswered', 'safe'] as const
 const SELF_LABEL: Record<string, string> = {
   safe:        '無事',
   injured:     '負傷',
-  need_rescue: '救助が必要',
+  need_rescue: '救助必要',
 }
 
 const FAMILY_LABEL: Record<string, string> = {
   safe:           '無事',
   injured:        '負傷',
-  need_rescue:    '救助が必要',
-  checking:       '安否確認中',
-  not_applicable: '対象家族なし',
+  need_rescue:    '救助必要',
+  checking:       '確認中',
+  not_applicable: '確認不要',
 }
 
 const WORK_LABEL: Record<string, string> = {
@@ -193,7 +193,7 @@ export function StatusSection({ employees, middleSlot }: { employees: EmployeeWi
             <div key={key} className="bg-white border-y border-gray-100 overflow-hidden">
               <div className={cn('flex items-center gap-2.5 px-4 py-2.5 border-l-4', summary.headerBg, summary.accentBorder)}>
                 <h3 className={cn('text-sm font-bold tracking-tight shrink-0', summary.fg)}>{config.label}</h3>
-                <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0', summary.badgeClass)}>{members.length}名</span>
+                <span className={cn('text-xs px-2.5 py-0.5 font-semibold shrink-0', summary.badgeClass)}>{members.length}名</span>
                 <p className="text-[10px] text-gray-400 truncate flex-1 text-right">{summary.description}</p>
               </div>
               <EmployeeGrid members={members} />

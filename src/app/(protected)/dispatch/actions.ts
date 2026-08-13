@@ -70,6 +70,12 @@ function parseEmployeeNumbers(raw: string | null): string[] | null {
   }
 }
 
+function parseOptionalInt(raw: FormDataEntryValue | null): number | null {
+  if (!raw || raw === '') return null
+  const n = parseInt(String(raw), 10)
+  return isNaN(n) ? null : n
+}
+
 export async function dispatchDrill(_prev: State, formData: FormData): Promise<State> {
   const employee = await getCurrentEmployee()
   if (!employee) redirect('/login')
@@ -79,6 +85,8 @@ export async function dispatchDrill(_prev: State, formData: FormData): Promise<S
     return { error: 'コメントは50文字以内で入力してください' }
   }
 
+  const maxIntensity = parseOptionalInt(formData.get('intensity'))
+  const epicenter    = ((formData.get('epicenter') as string) ?? '').trim() || null
   const employeeNumbers = parseEmployeeNumbers(formData.get('employee_numbers') as string)
 
   const admin = createAdminClient()
@@ -86,6 +94,8 @@ export async function dispatchDrill(_prev: State, formData: FormData): Promise<S
     p_event_type: 'test',
     p_issuer: employee.name,
     p_comment: comment,
+    p_max_intensity: maxIntensity,
+    p_epicenter: epicenter,
     p_employee_numbers: employeeNumbers,
   })
 
@@ -94,7 +104,13 @@ export async function dispatchDrill(_prev: State, formData: FormData): Promise<S
     return { error: '発報に失敗しました。もう一度お試しください。' }
   }
 
-  const slackResult = await postSlackAlert({ type: 'test', comment, issuedAt: new Date() })
+  const slackResult = await postSlackAlert({
+    type: 'test',
+    comment,
+    issuedAt: new Date(),
+    maxIntensity,
+    epicenter,
+  })
 
   if (slackResult.ok) {
     return { success: '安否確認を発報しました。' }
@@ -115,6 +131,8 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
     return { error: 'コメントは50文字以内で入力してください' }
   }
 
+  const maxIntensity = parseOptionalInt(formData.get('intensity'))
+  const epicenter    = ((formData.get('epicenter') as string) ?? '').trim() || null
   const employeeNumbers = parseEmployeeNumbers(formData.get('employee_numbers') as string)
 
   const admin = createAdminClient()
@@ -122,6 +140,8 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
     p_event_type: 'earthquake',
     p_issuer: employee.name,
     p_comment: comment,
+    p_max_intensity: maxIntensity,
+    p_epicenter: epicenter,
     p_employee_numbers: employeeNumbers,
   })
 
@@ -130,7 +150,13 @@ export async function dispatchProduction(_prev: State, formData: FormData): Prom
     return { error: '発報に失敗しました。もう一度お試しください。' }
   }
 
-  const slackResult = await postSlackAlert({ type: 'earthquake', comment, issuedAt: new Date() })
+  const slackResult = await postSlackAlert({
+    type: 'earthquake',
+    comment,
+    issuedAt: new Date(),
+    maxIntensity,
+    epicenter,
+  })
 
   if (slackResult.ok) {
     return { success: '安否確認を発報しました。' }

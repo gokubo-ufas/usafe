@@ -85,13 +85,13 @@ export default async function EventDetailPage({
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-semibold text-emerald-700 shrink-0">あなたの回答</h2>
           {myResponse?.self_status ? (
-            <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-full whitespace-nowrap">
+            <span className="text-xs font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-none whitespace-nowrap">
               ✓ 回答済み
             </span>
           ) : (
             <div className="flex items-center gap-1.5 shrink-0">
               <span className="text-xs font-bold text-red-600 animate-pulse whitespace-nowrap">急いでください！</span>
-              <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 rounded-full animate-pulse whitespace-nowrap">未回答</span>
+              <span className="text-xs font-bold text-white bg-red-500 px-2.5 py-1 rounded-none animate-pulse whitespace-nowrap">未回答</span>
             </div>
           )}
         </div>

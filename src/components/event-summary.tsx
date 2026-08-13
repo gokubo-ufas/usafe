@@ -9,7 +9,6 @@ type Props = {
 
 export function EventSummary({ event, answeredCount, totalCount }: Props) {
   const displayType = getDisplayEventType(event)
-  const isEarthquake = event.event_type === 'earthquake'
   const isDrill = displayType === 'test'
   const pct = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0
 
@@ -30,7 +29,11 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
           </div>
         </div>
 
-        {isEarthquake && event.max_intensity != null && (
+        <p className={`text-xs font-bold mt-1 ${isDrill ? 'text-amber-900/70' : 'text-white/80'}`}>
+          {isDrill ? '⚠️ これは避難訓練です' : '🚨 これは訓練ではありません'}
+        </p>
+
+        {event.max_intensity != null ? (
           <div className="mt-3">
             <p className="text-white/80 text-xs font-semibold">最大震度</p>
             <p className="text-white font-black leading-none tracking-tighter mt-0.5"
@@ -41,11 +44,9 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
               <p className="text-white text-base font-bold mt-1">{event.epicenter}</p>
             )}
           </div>
-        )}
-
-        {!isEarthquake && event.comment && (
+        ) : event.comment ? (
           <p className="text-white text-base font-bold mt-2 leading-snug">{event.comment}</p>
-        )}
+        ) : null}
 
         <p className="text-white/60 text-xs mt-2">発報者：{event.issuer ?? '自動'}</p>
       </div>
@@ -56,9 +57,9 @@ export function EventSummary({ event, answeredCount, totalCount }: Props) {
           <span className="text-xs text-gray-500 font-medium">回答率</span>
           <span className="text-xs text-gray-700 font-bold tabular-nums">{pct}%　{answeredCount} / {totalCount}名</span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-500"
+            className="h-full transition-all duration-500"
             style={{
               width: `${pct}%`,
               background: pct === 100

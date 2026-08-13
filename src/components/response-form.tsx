@@ -10,15 +10,15 @@ const INIT: State = {}
 const SELF_OPTIONS = [
   { value: 'safe',        label: '無事' },
   { value: 'injured',     label: '負傷' },
-  { value: 'need_rescue', label: '救助が必要' },
+  { value: 'need_rescue', label: '救助必要' },
 ]
 
 const FAMILY_OPTIONS = [
   { value: 'safe',           label: '無事' },
   { value: 'injured',        label: '負傷' },
-  { value: 'need_rescue',    label: '救助が必要' },
-  { value: 'checking',       label: '安否確認中' },
-  { value: 'not_applicable', label: '対象家族なし' },
+  { value: 'need_rescue',    label: '救助必要' },
+  { value: 'checking',       label: '確認中' },
+  { value: 'not_applicable', label: '確認不要' },
 ]
 
 const WORK_OPTIONS = [
