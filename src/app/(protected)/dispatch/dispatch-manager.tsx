@@ -109,59 +109,60 @@ export function DispatchManager({
   return (
     <div className="space-y-4">
 
-      {/* ── 社員一覧 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-
-        {/* ヘッダー */}
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-800">社員一覧</h2>
-            <button
-              type="button"
-              onClick={fetchGasPreview}
-              disabled={gasPending}
-              className="text-xs font-medium text-sky-600 hover:text-sky-700 disabled:opacity-40 transition-colors"
-            >
-              {gasPending ? '取得中…' : 'スプシから更新'}
-            </button>
-          </div>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="text-[10px] text-gray-600 font-medium">
-              合計 {employees.length}名
-            </span>
-            <span className="text-[10px] text-gray-300">|</span>
-            <span className="text-[10px] text-gray-400">在籍中 {activeEmployees.length}名</span>
-            <span className="text-[10px] text-gray-300">/</span>
-            <span className="text-[10px] text-gray-400">退職済 {retiredEmployees.length}名</span>
-            {lastUpdatedAt && (
-              <>
-                <span className="text-[10px] text-gray-300">|</span>
-                <span className="text-[10px] text-gray-400">
-                  最終更新 {new Date(lastUpdatedAt).toLocaleString('ja-JP', {
-                    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit',
-                    day: '2-digit', hour: '2-digit', minute: '2-digit',
-                  })}
-                </span>
-              </>
-            )}
-          </div>
+      {/* ── 発報 ── */}
+      <div>
+        <h2 className="text-sm font-bold text-gray-800 mb-2">発報</h2>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setModal('drill')}
+            disabled={checked.size === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
+          >
+            🟡 訓練発報
+          </button>
+          <button
+            type="button"
+            onClick={() => setModal('production')}
+            disabled={checked.size === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
+          >
+            🔴 本番発報
+          </button>
         </div>
+      </div>
 
-        {/* GAS同期差分 */}
+      {/* ── スプレッドシート取得 ── */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-[11px] text-gray-400 px-0.5">
+          <span>
+            {lastUpdatedAt
+              ? `最終取得：${new Date(lastUpdatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+              : '未取得'}
+          </span>
+          <span>合計 {employees.length}名（在籍中 {activeEmployees.length}名 / 退職済 {retiredEmployees.length}名）</span>
+        </div>
+        <button
+          type="button"
+          onClick={fetchGasPreview}
+          disabled={gasPending}
+          className="w-full py-3 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-40 rounded-xl transition-colors"
+        >
+          {gasPending ? '取得中…' : '社員情報をスプレッドシートから取得'}
+        </button>
+
         {preview && !preview.ok && (
-          <div className="px-4 py-2 bg-red-50 border-b border-red-100">
-            <p className="text-xs text-red-500">{preview.error}</p>
-          </div>
+          <p className="text-xs text-red-500 px-0.5">{preview.error}</p>
         )}
 
         {preview?.ok && (
-          <div className="px-4 py-3 border-b border-gray-100 space-y-2">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
             {preview.diff.length === 0 ? (
               <p className="text-xs text-emerald-600">変更はありません（スプレッドシートと一致しています）</p>
             ) : (
               <>
                 <p className="text-xs text-gray-500">{preview.diff.length}件の変更が検出されました</p>
-                <div className="rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                <div className="rounded-lg border border-gray-100 overflow-hidden divide-y divide-gray-100 max-h-48 overflow-y-auto">
                   {preview.diff.map((d, i) => <DiffRow key={i} entry={d} />)}
                 </div>
                 {syncResult?.ok ? (
@@ -183,6 +184,10 @@ export function DispatchManager({
             )}
           </div>
         )}
+      </div>
+
+      {/* ── 社員一覧 ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {/* テーブルヘッダー */}
         <div className="grid grid-cols-[1rem_4rem_1fr_1fr_1fr] gap-x-3 px-4 py-1.5 border-b border-gray-100 bg-gray-50/40 text-[10px] font-semibold text-gray-400 uppercase tracking-wide items-center">
@@ -246,32 +251,6 @@ export function DispatchManager({
             {allActiveChecked ? '全員の選択を解除' : '全員にチェック'}
           </button>
           <span className="text-xs text-gray-400">{checked.size}名を選択中</span>
-        </div>
-      </div>
-
-      {/* ── 発報 ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-        <div>
-          <h2 className="text-sm font-bold text-gray-800">発報</h2>
-          <p className="text-xs text-gray-400 mt-0.5">在籍中 {activeEmployees.length}名 全員に安否確認を送信します</p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setModal('drill')}
-            disabled={checked.size === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-xl transition-colors disabled:opacity-40"
-          >
-            🟡 訓練発報
-          </button>
-          <button
-            type="button"
-            onClick={() => setModal('production')}
-            disabled={checked.size === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-40"
-          >
-            🔴 本番発報
-          </button>
         </div>
       </div>
 
