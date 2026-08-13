@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ConfirmModal } from '@/components/confirm-modal'
@@ -45,6 +45,21 @@ export function DispatchManager({
 
   const [syncPending, startSync] = useTransition()
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null)
+
+  // sync後に在籍中が増えたら自動チェック
+  const prevActiveNums = useRef(new Set(activeEmployees.map(e => e.employee_number)))
+  useEffect(() => {
+    const currentNums = new Set(employees.filter(e => e.is_active).map(e => e.employee_number))
+    const added = [...currentNums].filter(n => !prevActiveNums.current.has(n))
+    if (added.length > 0) {
+      setChecked(prev => {
+        const next = new Set(prev)
+        added.forEach(n => next.add(n))
+        return next
+      })
+    }
+    prevActiveNums.current = currentNums
+  }, [employees])
 
   const allActiveChecked = activeEmployees.length > 0 && checked.size === activeEmployees.length
 
@@ -142,7 +157,7 @@ export function DispatchManager({
           </button>
           {syncResult?.ok && (
             <p className="text-xs text-center text-emerald-600">
-              ✓ {syncResult.received}名を登録（在籍中 {syncResult.active}名）
+              最新化が完了しました。
             </p>
           )}
           {syncResult && !syncResult.ok && (
